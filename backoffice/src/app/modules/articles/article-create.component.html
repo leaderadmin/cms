@@ -1,0 +1,62 @@
+<app-backoffice-page eyebrow="CONTENT / ARTICLES / NEW" title="Create article" description="Create a new article and its first translation." [loading]="loading" [error]="error" (retry)="goToList()">
+  <div page-actions class="page-actions">
+    <button class="btn btn-light" type="button" (click)="goToList()"><i class="bi bi-arrow-left"></i> Back to articles</button>
+  </div>
+
+  @if (!loading && can('article.create')) {
+    <section class="create-panel">
+      <div class="editor-grid">
+        <label>Internal name<input class="form-control" [(ngModel)]="draft.name" name="article_name"></label>
+        <label>Type<select class="form-select" [(ngModel)]="draft.type" name="article_type"><option value="article">Article</option><option value="shareholder">Shareholder</option></select></label>
+        <label>Status<select class="form-select" [(ngModel)]="draft.status" name="article_status"><option [ngValue]="2">Pending</option><option [ngValue]="1">Active</option></select></label>
+        <label>Category<app-article-category-select [categories]="categories" [(selectedIds)]="draft.category_ids"></app-article-category-select></label>
+        <label>Tags<app-article-tag-input [availableTags]="availableTags" [(tags)]="draft.tags" [(tagIds)]="draft.tag_ids"></app-article-tag-input></label>
+        <label class="wide">Thumbnail<app-article-image-picker [(imageId)]="draft.image_id"></app-article-image-picker></label>
+      </div>
+      <ul class="nav nav-tabs article-language-tabs" role="tablist" aria-label="Article languages">
+        <li class="nav-item" role="presentation"><button class="nav-link" [class.active]="activeLanguage === 'en'" type="button" role="tab" [attr.aria-selected]="activeLanguage === 'en'" (click)="switchLanguage('en')"><i class="bi bi-globe2 me-1"></i>English</button></li>
+        <li class="nav-item" role="presentation"><button class="nav-link" [class.active]="activeLanguage === 'vi'" type="button" role="tab" [attr.aria-selected]="activeLanguage === 'vi'" (click)="switchLanguage('vi')"><i class="bi bi-translate me-1"></i>Tiếng Việt</button></li>
+      </ul>
+      @if (activeLanguage === 'en') {
+        <div class="language-form" role="tabpanel" aria-label="English article form">
+          <div class="editor-grid">
+            <label class="wide">Title (English)<input class="form-control" [(ngModel)]="englishTranslation.title" name="article_title_en" required></label>
+            <label>URL key<input class="form-control" [(ngModel)]="englishTranslation.url_key" name="article_url_key_en" required></label>
+            <label class="wide">Short description<textarea class="form-control" rows="3" [(ngModel)]="englishTranslation.short_description" name="article_summary_en"></textarea></label>
+            <label class="wide">Content HTML<app-article-html-editor [(content)]="englishTranslation.content"></app-article-html-editor></label>
+            <details class="wide conversion-panel" open>
+              <summary><i class="bi bi-graph-up-arrow"></i><span><strong>SEO English</strong><small>Search engine metadata for English.</small></span></summary>
+              <div class="conversion-grid"><label>SEO title<input class="form-control" [(ngModel)]="englishTranslation.seo_title" name="article_seo_title_en" maxlength="255"></label><label>Meta description<textarea class="form-control" rows="2" [(ngModel)]="englishTranslation.meta_description" name="article_meta_description_en" maxlength="160"></textarea></label></div>
+            </details>
+          </div>
+        </div>
+      } @else {
+        <div class="language-form" role="tabpanel" aria-label="Vietnamese article form">
+          <div class="editor-grid">
+            <label class="wide">Tiêu đề (Tiếng Việt)<input class="form-control" [(ngModel)]="vietnameseTranslation.title" name="article_title_vi" required></label>
+            <label>URL key<input class="form-control" [(ngModel)]="vietnameseTranslation.url_key" name="article_url_key_vi" required></label>
+            <label class="wide">Mô tả ngắn<textarea class="form-control" rows="3" [(ngModel)]="vietnameseTranslation.short_description" name="article_summary_vi"></textarea></label>
+            <label class="wide">Nội dung HTML<app-article-html-editor [(content)]="vietnameseTranslation.content"></app-article-html-editor></label>
+            <details class="wide conversion-panel" open>
+              <summary><i class="bi bi-graph-up-arrow"></i><span><strong>SEO Tiếng Việt</strong><small>Thông tin SEO cho nội dung tiếng Việt.</small></span></summary>
+              <div class="conversion-grid"><label>SEO title<input class="form-control" [(ngModel)]="vietnameseTranslation.seo_title" name="article_seo_title_vi" maxlength="255"></label><label>Meta description<textarea class="form-control" rows="2" [(ngModel)]="vietnameseTranslation.meta_description" name="article_meta_description_vi" maxlength="160"></textarea></label></div>
+            </details>
+          </div>
+        </div>
+      }
+      <div class="conversion-common">
+        <details class="conversion-panel" open>
+          <summary><i class="bi bi-megaphone"></i><span><strong>CTA & conversion</strong><small>Shared call-to-action for this article.</small></span></summary>
+          <div class="conversion-grid">
+            <label>CTA button text<input class="form-control" [(ngModel)]="draft.cta.label" name="article_cta_label" placeholder="Get a consultation"></label>
+            <label>CTA URL<input class="form-control" [(ngModel)]="draft.cta.url" name="article_cta_url" placeholder="https://... or /contact"></label>
+            <label>CTA phone<input class="form-control" [(ngModel)]="draft.cta.phone" name="article_cta_phone" placeholder="0901 234 567"></label>
+          </div>
+        </details>
+      </div>
+      <div class="editor-actions"><button class="btn btn-primary" type="button" (click)="save()" [disabled]="saving || !translationsReady()"><i class="bi bi-check-lg"></i> {{ saving ? 'Creating...' : 'Create article' }}</button></div>
+    </section>
+  } @else if (!loading) {
+    <p class="form-error">You do not have permission to create articles.</p>
+  }
+</app-backoffice-page>

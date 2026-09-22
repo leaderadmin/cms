@@ -1,0 +1,12 @@
+<div class="tag-input">
+  <div class="tag-list">
+    @for (tag of tags; track tag) {
+      <span class="tag-chip">{{ tag }} <button type="button" (click)="remove(tag)" [attr.aria-label]="'Remove ' + tag">&times;</button></span>
+    }
+    @if (availableTags.length) {
+      <select class="tag-entry" (change)="selectTag($event)" aria-label="Select tag"><option value="">Select managed tag</option>@for (tag of availableTags; track tag.id) { @if (!tagIds.includes(tag.id)) { <option [value]="tag.id">{{ tag.name }}</option> } }</select>
+    } @else {
+      <input class="tag-entry" type="text" [(ngModel)]="draft" (keydown)="onKeydown($event)" (blur)="add()" placeholder="Add a tag and press Enter">
+    }
+  </div>
+</div>

@@ -1,0 +1,92 @@
+<section class="settings-page" aria-labelledby="settings-title">
+  <header class="settings-header">
+    <div>
+      <p class="eyebrow">SETTINGS / WORKSPACE</p>
+      <h1 id="settings-title">Settings</h1>
+      <p class="subtitle">Configure the workspace, security defaults and notification preferences.</p>
+    </div>
+    <div class="header-actions">
+      @if (saved) { <span class="saved-state"><i class="bi bi-check-circle-fill"></i> Changes saved</span> }
+    </div>
+  </header>
+
+  <div class="settings-layout">
+    <aside class="settings-nav" aria-label="Settings sections">
+      @for (section of sections; track section.id) {
+        <button type="button" class="settings-nav-item" [class.active]="activeSection === section.id" (click)="selectSection(section.id)">
+          <i [class]="'bi ' + section.icon"></i>
+          <span><strong>{{ section.label }}</strong><small>{{ section.description }}</small></span>
+          <i class="bi bi-chevron-right arrow"></i>
+        </button>
+      }
+      <div class="settings-nav-note"><i class="bi bi-info-circle"></i><span>Changes are saved for this browser and apply to your backoffice workspace.</span></div>
+    </aside>
+
+    <form class="settings-content" (ngSubmit)="save()">
+      @if (activeSection === 'general') {
+        <div class="section-heading"><div class="section-icon teal"><i class="bi bi-building"></i></div><div><h2>General</h2><p>Basic information used across the backoffice.</p></div></div>
+        <div class="form-grid">
+          <div class="field full"><label for="organization-name">System name</label><input id="organization-name" name="organizationName" class="form-control" [(ngModel)]="form.organizationName"><small>Shown in the navigation brand and system messages.</small></div>
+          <div><label for="api-domain">API domain</label><input id="api-domain" name="apiDomain" type="url" class="form-control" [(ngModel)]="form.apiDomain" placeholder="https://api.example.com"><small>Used for uploaded logo and API links.</small></div>
+          <div><label for="backoffice-domain">Backoffice domain</label><input id="backoffice-domain" name="backofficeDomain" type="url" class="form-control" [(ngModel)]="form.backofficeDomain" placeholder="https://admin.example.com"><small>Public address of this backoffice.</small></div>
+          <div class="field full"><label for="logo-file">System logo</label><div class="logo-upload-row">@if (form.logoUrl) { <img class="logo-preview" [src]="form.logoUrl" [alt]="form.organizationName"> } @else { <span class="logo-preview logo-fallback">{{ form.organizationName.charAt(0).toUpperCase() }}</span> }<input id="logo-file" name="logoFile" type="file" class="form-control" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" (change)="uploadLogo($event)" [disabled]="logoUploading"><span class="upload-status">{{ logoUploading ? 'Uploading...' : 'PNG, JPG, GIF, WEBP or SVG, max 5 MB' }}</span></div><small>Upload a logo to show in the navigation brand. You can still use a public URL below if needed.</small></div>
+          <div class="field full"><label for="logo-url">Logo URL</label><input id="logo-url" name="logoUrl" type="url" class="form-control" [(ngModel)]="form.logoUrl" placeholder="https://example.com/logo.png"></div>
+          <div><label for="favicon-url">Favicon URL</label><input id="favicon-url" name="faviconUrl" type="url" class="form-control" [(ngModel)]="form.faviconUrl"></div>
+          <div><label for="system-version">Version</label><input id="system-version" name="version" class="form-control" [(ngModel)]="form.version"></div>
+          <div class="field full"><label for="system-description">Description</label><input id="system-description" name="description" class="form-control" [(ngModel)]="form.description"></div>
+          <div><label for="website-url">Website URL</label><input id="website-url" name="websiteUrl" type="url" class="form-control" [(ngModel)]="form.websiteUrl"></div>
+          <div><label for="support-email">Support email</label><input id="support-email" name="supportEmail" type="email" class="form-control" [(ngModel)]="form.supportEmail"></div>
+          <div class="field full"><label for="footer-text">Footer text</label><input id="footer-text" name="footerText" class="form-control" [(ngModel)]="form.footerText"></div>
+        </div>
+        <div class="setting-row"><div><strong>Workspace status</strong><p>Allow administrators to access the operations console.</p></div><span class="status-pill"><i class="bi bi-circle-fill"></i> Active</span></div>
+      }
+      @if (activeSection === 'localization') {
+        <div class="section-heading"><div class="section-icon blue"><i class="bi bi-translate"></i></div><div><h2>Localization</h2><p>Set the language, timezone and date display for your workspace.</p></div></div>
+        <div class="form-grid">
+          <div><label for="language">Default language</label><select id="language" name="language" class="form-select" [(ngModel)]="form.language" (ngModelChange)="languageChanged($event)"><option value="en">English</option><option value="vi">Tiếng Việt</option></select></div>
+          <div><label for="timezone">Timezone</label><select id="timezone" name="timezone" class="form-select" [(ngModel)]="form.timezone"><option value="Asia/Ho_Chi_Minh">(GMT+07:00) Ho Chi Minh</option><option value="Asia/Singapore">(GMT+08:00) Singapore</option><option value="UTC">(GMT+00:00) UTC</option></select></div>
+          <div><label for="date-format">Date format</label><select id="date-format" name="dateFormat" class="form-select" [(ngModel)]="form.dateFormat"><option value="dd/MM/yyyy">31/12/2026</option><option value="MM/dd/yyyy">12/31/2026</option><option value="yyyy-MM-dd">2026-12-31</option></select></div>
+        </div>
+      }
+      @if (activeSection === 'security') {
+        <div class="section-heading"><div class="section-icon red"><i class="bi bi-shield-lock"></i></div><div><h2>Security</h2><p>Manage session lifetime and additional sign-in protection.</p></div></div>
+        <div class="form-grid"><div><label for="session-timeout">Session timeout</label><div class="input-group"><input id="session-timeout" name="sessionTimeout" type="number" min="5" max="480" class="form-control" [(ngModel)]="form.sessionTimeout"><span class="input-group-text">minutes</span></div><small>Users will be asked to sign in again after inactivity.</small></div></div>
+        <div class="setting-row"><div><strong>Require multi-factor authentication</strong><p>Require an additional verification step for administrator accounts.</p></div><input class="form-check-input switch" type="checkbox" name="requireMfa" [(ngModel)]="form.requireMfa"></div>
+      }
+      @if (activeSection === 'notifications') {
+        <div class="section-heading"><div class="section-icon amber"><i class="bi bi-bell"></i></div><div><h2>Notifications</h2><p>Choose which events should reach administrators.</p></div></div>
+        <div class="setting-row"><div><strong>New sign-in alerts</strong><p>Notify administrators when a new session is created.</p></div><input class="form-check-input switch" type="checkbox" name="loginAlerts" [(ngModel)]="form.loginAlerts"></div>
+        <div class="setting-row"><div><strong>Weekly activity digest</strong><p>Send a summary of activity logs and access changes.</p></div><input class="form-check-input switch" type="checkbox" name="emailDigest" [(ngModel)]="form.emailDigest"></div>
+      }
+      @if (activeSection === 'mail') {
+        <div class="section-heading"><div class="section-icon mail"><i class="bi bi-envelope-paper"></i></div><div><h2>Mail</h2><p>Configure delivery, send a test message and manage reusable email templates.</p></div></div>
+        <div class="mail-section">
+          <div class="mail-subheading"><div><h3>SMTP delivery</h3><p>Credentials stay in this workspace until the mail API is connected.</p></div><label class="form-check form-switch mail-toggle"><input class="form-check-input" type="checkbox" name="mailEnabled" [(ngModel)]="mailConfig.enabled"><span>Mail enabled</span></label></div>
+          <div class="form-grid mail-grid">
+            <div><label for="mail-provider">Provider</label><select id="mail-provider" name="mailProvider" class="form-select" [(ngModel)]="mailConfig.provider"><option value="smtp">Custom SMTP</option><option value="sendgrid">SendGrid</option><option value="ses">Amazon SES</option><option value="mailgun">Mailgun</option></select></div>
+            <div><label for="mail-encryption">Encryption</label><select id="mail-encryption" name="mailEncryption" class="form-select" [(ngModel)]="mailConfig.encryption"><option value="tls">STARTTLS</option><option value="ssl">SSL / TLS</option><option value="none">None</option></select></div>
+            <div class="field-wide"><label for="mail-host">SMTP host</label><input id="mail-host" name="mailHost" class="form-control" [(ngModel)]="mailConfig.host" placeholder="smtp.example.com"></div>
+            <div><label for="mail-port">Port</label><input id="mail-port" name="mailPort" type="number" class="form-control" [(ngModel)]="mailConfig.port"></div>
+            <div><label for="mail-username">Username</label><input id="mail-username" name="mailUsername" class="form-control" [(ngModel)]="mailConfig.username" autocomplete="off"></div>
+            <div><label for="mail-password">Password</label><input id="mail-password" name="mailPassword" type="password" class="form-control" [(ngModel)]="mailConfig.password" autocomplete="new-password"></div>
+            <div><label for="mail-from-name">From name</label><input id="mail-from-name" name="mailFromName" class="form-control" [(ngModel)]="mailConfig.fromName"></div>
+            <div><label for="mail-from-email">From email</label><input id="mail-from-email" name="mailFromEmail" type="email" class="form-control" [(ngModel)]="mailConfig.fromEmail" placeholder="no-reply@example.com"></div>
+          </div>
+          <div class="test-mail-box"><div><strong>Send a test email</strong><p>Check the SMTP configuration before enabling notification workflows.</p></div><div class="test-mail-actions"><input class="form-control" name="testRecipient" type="email" [(ngModel)]="mailConfig.testRecipient" placeholder="recipient@example.com"><button class="btn btn-outline-primary" type="button" (click)="sendTestEmail()" [disabled]="testSending"><i class="bi bi-send me-1"></i>{{ testSending ? 'Preparing...' : 'Send test' }}</button></div></div>
+          @if (testError) { <div class="alert alert-danger mail-alert">{{ testError }}</div> }
+          @if (testStatus) { <div class="alert alert-success mail-alert"><i class="bi bi-check-circle me-1"></i>{{ testStatus }}</div> }
+        </div>
+        <div class="mail-section templates-section"><div class="mail-subheading"><div><h3>Email templates</h3><p>Use variables such as <code>{{ '{{ username }}' }}</code> and <code>{{ '{{ resetUrl }}' }}</code>.</p></div><button class="btn btn-primary btn-sm" type="button" (click)="newTemplate()"><i class="bi bi-plus-lg me-1"></i>New template</button></div>
+          <div class="template-layout"><div class="template-list">@for (template of templates; track template.id) {<button type="button" class="template-item" [class.active]="selectedTemplateId === template.id" (click)="selectTemplate(template)"><span><strong>{{ template.name }}</strong><small>{{ template.key }}</small></span><i class="bi bi-chevron-right"></i></button>} @empty {<p class="empty-template">No templates yet.</p>}</div>
+            @if (templateEditing) {<div class="template-editor"><div class="editor-heading"><h4>{{ selectedTemplateId ? 'Edit template' : 'New template' }}</h4><button class="btn btn-link btn-sm" type="button" (click)="templateEditing = false">Close</button></div><div class="form-grid"><div><label for="template-name">Template name</label><input id="template-name" name="templateName" class="form-control" [(ngModel)]="templateDraft.name"></div><div><label for="template-key">Template key</label><input id="template-key" name="templateKey" class="form-control" [(ngModel)]="templateDraft.key" placeholder="notifications.alert"></div><div class="field-wide"><label for="template-subject">Subject</label><input id="template-subject" name="templateSubject" class="form-control" [(ngModel)]="templateDraft.subject"></div><div class="field-wide"><label for="template-body">Message body</label><textarea id="template-body" name="templateBody" class="form-control template-body" rows="6" [(ngModel)]="templateDraft.body"></textarea></div></div><div class="editor-footer"><label class="form-check"><input class="form-check-input" type="checkbox" name="templateEnabled" [(ngModel)]="templateDraft.enabled"><span>Template active</span></label><div><button class="btn btn-outline-danger btn-sm me-2" type="button" [disabled]="!selectedTemplateId" (click)="deleteTemplate(templateDraft)">Delete</button><button class="btn btn-primary btn-sm" type="button" (click)="saveTemplate()">Save template</button></div></div></div>}
+          </div>
+        </div>
+      }
+      @if (activeSection === 'appearance') {
+        <div class="section-heading"><div class="section-icon violet"><i class="bi bi-palette"></i></div><div><h2>Appearance</h2><p>Use the floating gear button on the right side to customize the workspace instantly.</p></div></div>
+        <div class="setting-row"><div><strong>Compact tables</strong><p>Fit more rows into activity logs and management screens.</p></div><input class="form-check-input switch" type="checkbox" name="compactTables" [(ngModel)]="form.compactTables"></div>
+      }
+      <footer class="content-footer"><button class="btn btn-link reset" type="button" (click)="reset()">Reset defaults</button><button class="btn btn-primary" type="submit">Save changes</button></footer>
+    </form>
+  </div>
+</section>

@@ -1,0 +1,52 @@
+<app-backoffice-page eyebrow="CONTENT / MEDIA" title="File Manager" description="Organize, upload and manage files used by the application.">
+  <div page-actions class="d-flex gap-2">
+    <button class="btn btn-outline-secondary" type="button" (click)="load()" [disabled]="loading"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+  </div>
+
+  <div class="file-manager">
+    <aside class="file-sidebar">
+      @if (can('media.upload')) { <label class="upload-button" for="media-upload"><i class="bi bi-cloud-arrow-up"></i>Upload files</label> }
+      <input class="d-none" id="media-upload" type="file" multiple (change)="chooseFiles($event)">
+      @if (can('media.folder.create')) { <button class="folder-button" type="button" (click)="createFolder()"><i class="bi bi-folder-plus"></i>New folder</button> }
+      <nav class="folder-nav" aria-label="File locations">
+        <button type="button" [class.active]="activeSection === 'drive'" (click)="selectSection('drive')"><i class="bi bi-cloud"></i><span>My Drive</span><strong>{{ files.length }}</strong></button>
+        <button type="button" [class.active]="activeSection === 'documents'" (click)="selectSection('documents')"><i class="bi bi-folder2"></i><span>Documents</span><strong>{{ documentCount }}</strong></button>
+        <button type="button" [class.active]="activeSection === 'images'" (click)="selectSection('images')"><i class="bi bi-images"></i><span>Images</span><strong>{{ imageCount }}</strong></button>
+        <button type="button" [class.active]="activeSection === 'recent'" (click)="selectSection('recent')"><i class="bi bi-clock"></i><span>Recent</span><strong>{{ files.length > 8 ? 8 : files.length }}</strong></button>
+        <button type="button" disabled><i class="bi bi-star"></i><span>Starred</span><strong>0</strong></button>
+        <button type="button" disabled><i class="bi bi-trash3"></i><span>Trash</span><strong>0</strong></button>
+        @for (folder of visibleFolders; track folder.id) {
+          <div class="folder-tree-row" [style.padding-left.px]="15 + folder.depth * 18">
+            <button class="folder-toggle" type="button" [attr.aria-label]="isFolderExpanded(folder) ? 'Collapse folder' : 'Expand folder'" (click)="toggleFolder(folder, $event)">
+              <i class="bi" [class.bi-chevron-down]="isFolderExpanded(folder)" [class.bi-chevron-right]="!isFolderExpanded(folder)"></i>
+            </button>
+            <button class="folder-item" type="button" [class.active]="activeFolderId === folder.id" (click)="selectFolder(folder)">
+              <i class="bi bi-folder2"></i><span>{{ folder.name }}</span><strong>{{ folder.file_count }}</strong>
+            </button>
+            @if (can('media.delete')) { <button class="folder-delete" type="button" title="Delete folder" [attr.aria-label]="'Delete ' + folder.name" (click)="removeFolder(folder)"><i class="bi bi-trash"></i></button> }
+          </div>
+        }
+      </nav>
+      <div class="storage-meter"><div class="storage-title"><span><i class="bi bi-cloud"></i> Storage</span><strong>{{ formatSize(totalSize) }}</strong></div><div class="progress"><div class="progress-bar" [style.width.%]="storagePercent"></div></div><small>of 10 GB used</small></div>
+    </aside>
+
+    <section class="file-content">
+      <div class="file-toolbar">
+        <div class="breadcrumb"><button type="button" (click)="selectSection('drive')"><i class="bi bi-house"></i></button><i class="bi bi-chevron-right"></i><strong>{{ sectionLabel }}</strong></div>
+        <div class="file-tools"><div class="input-group search-box"><span class="input-group-text"><i class="bi bi-search"></i></span><input class="form-control" type="search" placeholder="Search files..." [(ngModel)]="search" (keyup.enter)="load()"></div><div class="view-toggle"><button type="button" [class.active]="viewMode === 'grid'" (click)="viewMode = 'grid'" aria-label="Grid view"><i class="bi bi-grid-3x3-gap"></i></button><button type="button" [class.active]="viewMode === 'list'" (click)="viewMode = 'list'" aria-label="List view"><i class="bi bi-list"></i></button></div></div>
+      </div>
+      @if (selectedFiles.length) { <div class="upload-queue"><i class="bi bi-paperclip"></i>{{ selectedFiles.length }} file(s) selected <button type="button" class="btn btn-sm btn-dark" [disabled]="uploading" (click)="upload()">{{ uploading ? 'Uploading...' : 'Start upload' }}</button></div> }
+      @if (error) { <div class="alert alert-danger" role="alert">{{ error }}</div> }
+      @if (loading) { <div class="text-body-secondary py-4">Loading media library...</div> }
+      @else if (viewMode === 'grid') {
+        <div class="file-grid">
+          @for (file of filteredFiles; track file.id) { <article class="file-tile"><button class="file-preview" type="button" (click)="download(file)" [attr.aria-label]="'Download ' + file.name">@if (isImage(file) && previewUrl(file)) { <img class="file-thumbnail" [src]="previewUrl(file)" [alt]="file.name"> } @else { <i class="bi" [class]="fileIcon(file) + ' file-icon ' + fileTone(file)"></i> }</button><div class="file-tile-name" [title]="file.name">{{ file.name }}</div><div class="file-tile-meta"><span><i class="bi bi-file-earmark"></i>{{ file.extension || 'file' }}</span><span>{{ formatSize(file.size) }}</span></div><div class="file-tile-actions"><button type="button" (click)="download(file)" title="Download"><i class="bi bi-download"></i></button>@if (can('media.delete')) { <button type="button" (click)="remove(file)" title="Delete"><i class="bi bi-trash"></i></button> }</div></article> }
+        </div>
+      } @else {
+        <div class="list-card"><table class="table align-middle mb-0"><thead><tr><th>File</th><th>Type</th><th>Size</th><th>Uploaded by</th><th>Created</th><th></th></tr></thead><tbody>@for (file of filteredFiles; track file.id) { <tr><td><i class="bi me-2" [class]="fileIcon(file) + ' file-icon ' + fileTone(file)"></i><strong>{{ file.name }}</strong></td><td>{{ file.content_type || file.extension }}</td><td>{{ formatSize(file.size) }}</td><td>{{ file.uploaded_by || '-' }}</td><td>{{ file.created_at | date:'mediumDate' }}</td><td class="text-end"><button class="btn btn-sm btn-link" type="button" (click)="download(file)"><i class="bi bi-download"></i></button>@if (can('media.delete')) { <button class="btn btn-sm btn-link text-danger" type="button" (click)="remove(file)"><i class="bi bi-trash"></i></button> }</td></tr> } @empty { <tr><td colspan="6" class="text-center text-body-secondary py-5">No files found.</td></tr> }</tbody></table></div>
+      }
+      @if (!loading && !filteredFiles.length && viewMode === 'grid') { <div class="empty-state"><i class="bi bi-folder2-open"></i><strong>No files found</strong><span>Upload a file to start building your library.</span></div> }
+      <div class="file-count">{{ filteredFiles.length }} item(s)</div>
+    </section>
+  </div>
+</app-backoffice-page>

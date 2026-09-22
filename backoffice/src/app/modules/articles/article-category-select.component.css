@@ -1,0 +1,13 @@
+.category-select { position: relative; }
+.category-trigger { align-items: center; background: #fff; border: 1px solid #ced4da; border-radius: .25rem; color: #495057; display: flex; gap: .5rem; justify-content: space-between; min-height: 38px; padding: .35rem .65rem; text-align: left; width: 100%; }
+.category-trigger:focus { border-color: #80bdff; box-shadow: 0 0 0 .2rem rgba(60, 141, 188, .2); outline: 0; }
+.category-chips { display: flex; flex-wrap: wrap; gap: .25rem; }
+.category-chip { background: #e9f2f9; border: 1px solid #b8d7ea; border-radius: .2rem; color: #27749d; font-size: .75rem; padding: .2rem .45rem; }
+.category-chip button { background: transparent; border: 0; color: inherit; line-height: 1; padding: 0 0 0 .2rem; }
+.category-placeholder { color: #667085; font-weight: 400; }
+.category-menu { background: #fff; border: 1px solid #ced4da; border-radius: .25rem; box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15); left: 0; padding: .5rem; position: absolute; right: 0; top: calc(100% + .25rem); z-index: 20; }
+.category-search { margin-bottom: .5rem; }
+.category-options { max-height: 220px; overflow-y: auto; }
+.category-option { align-items: center; display: flex; font-size: .85rem; font-weight: 400; gap: .5rem; padding: .4rem .25rem; }
+.category-option:hover { background: #f5f7fa; }
+.category-empty { color: #667085; display: block; font-size: .82rem; padding: .75rem .25rem; }

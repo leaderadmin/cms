@@ -1,0 +1,10 @@
+<main class="public-page" ng-controller="PageRenderController as renderer" ng-class="{'is-loading': renderer.loading}">
+  <div class="public-status" ng-if="renderer.loading"><span class="loader-dot"></span>Loading page</div>
+  <section class="public-error" ng-if="!renderer.loading && renderer.error"><strong>{{ renderer.error }}</strong><a href="/">Back to home</a></section>
+  <article class="published-page" ng-if="!renderer.loading && !renderer.error">
+    <header class="public-page-header"><span class="eyebrow">STARTUP / {{ renderer.page.template_key }}</span><h1>{{ renderer.page.name }}</h1></header>
+    <section ng-repeat="region in renderer.template.regions track by region.id" class="published-region" ng-class="{'is-locked': region.locked}">
+      <div ng-repeat="block in renderer.blocks(region) track by $index" class="published-block"><div dynamic-block="block"></div></div>
+    </section>
+  </article>
+</main>

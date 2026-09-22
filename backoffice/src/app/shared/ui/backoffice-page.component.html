@@ -1,0 +1,18 @@
+<section class="page-header">
+  <div>
+    <p class="eyebrow">{{ eyebrow }}</p>
+    <h1>{{ title }}</h1>
+    @if (description) { <p class="lede">{{ description }}</p> }
+  </div>
+  <div class="page-actions"><ng-content select="[page-actions]"></ng-content></div>
+</section>
+
+@if (loading) { <mat-progress-bar mode="indeterminate"></mat-progress-bar> }
+@if (error) {
+  <section class="page-error" role="alert">
+    <span>{{ error }}</span>
+    <button mat-stroked-button type="button" (click)="retry.emit()">Try again</button>
+  </section>
+}
+
+<ng-content></ng-content>

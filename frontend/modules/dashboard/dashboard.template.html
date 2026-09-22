@@ -1,0 +1,30 @@
+<main class="shell" ng-controller="DashboardController as dashboard">
+  <header class="hero">
+    <p class="eyebrow">DJANGO / ANGULARJS / REDIS</p>
+    <h1>Startup Console</h1>
+    <p class="lede">A small operational view for your API and scheduled jobs.</p>
+    <button class="refresh" ng-click="dashboard.refresh()">Refresh data</button>
+  </header>
+
+  <section class="status-line" ng-class="{'is-down': dashboard.health.redis !== 'ok'}">
+    <span class="pulse"></span>
+    API <strong>{{ dashboard.health.status || 'checking...' }}</strong>
+    <span class="divider">·</span>
+    Redis <strong>{{ dashboard.health.redis || 'checking...' }}</strong>
+  </section>
+
+  <section class="metrics" aria-label="System metrics">
+    <article class="metric-card">
+      <span class="metric-label">API visits</span>
+      <strong class="metric-value">{{ dashboard.stats.visits || 0 }}</strong>
+      <span class="metric-note">Stored in Redis</span>
+    </article>
+    <article class="metric-card accent">
+      <span class="metric-label">Last cron run</span>
+      <strong class="metric-value small">{{ dashboard.lastRunLabel() }}</strong>
+      <span class="metric-note">Every five minutes</span>
+    </article>
+  </section>
+
+  <footer>Ready for your next feature.</footer>
+</main>

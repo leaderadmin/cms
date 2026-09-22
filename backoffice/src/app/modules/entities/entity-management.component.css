@@ -1,0 +1,8 @@
+:host { display: block; }
+.schema-card { border-color: #dbe6e3; }
+.table-list { max-height: 62vh; overflow-y: auto; }
+.table-list .list-group-item small { display: block; margin-left: 28px; color: var(--bs-secondary-color); font-size: .75rem; }
+.table-list .list-group-item.active small { color: rgba(255, 255, 255, .75); }
+.editor { background: #f8faf9; }
+.table th { white-space: nowrap; font-size: .78rem; letter-spacing: .03em; text-transform: uppercase; }
+@media (max-width: 1199.98px) { .table-list { max-height: 280px; } }

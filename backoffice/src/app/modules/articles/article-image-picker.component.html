@@ -1,0 +1,24 @@
+<div class="image-picker">
+  @if (selected; as image) {
+    <div class="selected-image">
+      @if (preview(image)) { <img [src]="preview(image)" [alt]="image.name"> } @else { <span class="image-loading"><i class="bi bi-image"></i></span> }
+      <div class="selected-copy"><strong>{{ image.name }}</strong><span>Selected thumbnail</span></div>
+      <button class="image-action" type="button" title="Remove thumbnail" (click)="clear()"><i class="bi bi-x-lg"></i></button>
+    </div>
+  } @else {
+    <div class="image-empty"><i class="bi bi-image"></i><div><strong>No thumbnail selected</strong><span>Choose from Media Library or upload a new image.</span></div></div>
+  }
+  <div class="image-actions">
+    <button class="btn btn-sm btn-outline-secondary" type="button" (click)="open = !open"><i class="bi bi-images"></i> {{ open ? 'Close library' : 'Browse library' }}</button>
+    <label class="btn btn-sm btn-outline-primary" for="article-thumbnail-upload"><i class="bi bi-upload"></i> {{ uploading ? 'Uploading...' : 'Upload image' }}</label>
+    <input id="article-thumbnail-upload" class="d-none" type="file" accept="image/png,image/jpeg,image/gif,image/webp" (change)="chooseFile($event)" [disabled]="uploading">
+  </div>
+  @if (open) {
+    <div class="image-library">
+      @if (loading) { <span class="library-note">Loading images...</span> }
+      @for (image of images; track image.id) {
+        <button type="button" class="image-option" [class.selected]="image.id === imageId" (click)="select(image)">@if (preview(image)) { <img [src]="preview(image)" [alt]="image.name"> } @else { <span class="image-loading"><i class="bi bi-image"></i></span> }<span>{{ image.name }}</span></button>
+      } @empty { @if (!loading) { <span class="library-note">No images found in Media Library.</span> } }
+    </div>
+  }
+</div>

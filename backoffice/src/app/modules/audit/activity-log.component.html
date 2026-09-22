@@ -1,0 +1,42 @@
+<section class="activity-page" aria-labelledby="activity-title">
+  <header class="page-heading">
+    <div><p class="eyebrow">MONITORING / AUDIT</p><h1 id="activity-title">Activity logs</h1><p class="text-body-secondary">Review API requests, authentication events and data changes.</p></div>
+    <button class="btn btn-outline-secondary" type="button" (click)="load()" [disabled]="loading"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+  </header>
+
+  <div class="card filter-card card-outline card-primary">
+    <div class="card-header"><h2 class="card-title"><i class="bi bi-funnel me-2"></i>Filters</h2></div>
+    <form class="card-body row g-3" (ngSubmit)="applyFilters()">
+      <div class="col-lg-3 col-md-6"><label class="form-label" for="log-action">Action</label><input id="log-action" class="form-control" name="action" [(ngModel)]="filters.action" placeholder="auth.login"></div>
+      <div class="col-lg-3 col-md-6"><label class="form-label" for="log-path">Path</label><input id="log-path" class="form-control" name="path" [(ngModel)]="filters.path" placeholder="/api/auth"></div>
+      <div class="col-lg-2 col-md-4"><label class="form-label" for="log-user">Username</label><input id="log-user" class="form-control" name="username" [(ngModel)]="filters.username"></div>
+      <div class="col-lg-2 col-md-4"><label class="form-label" for="log-status">Status</label><input id="log-status" class="form-control" name="status_code" [(ngModel)]="filters.status_code" inputmode="numeric" placeholder="500"></div>
+      <div class="col-lg-2 col-md-4"><label class="form-label" for="log-level">Level</label><select id="log-level" class="form-select" name="level" [(ngModel)]="filters.level"><option value="">All levels</option><option value="INFO">Info</option><option value="WARNING">Warning</option><option value="ERROR">Error</option><option value="CRITICAL">Critical</option></select></div>
+      <div class="col-12 d-flex justify-content-end gap-2"><button class="btn btn-outline-secondary" type="button" (click)="clearFilters()">Clear</button><button class="btn btn-primary" type="submit"><i class="bi bi-search me-1"></i>Apply filters</button></div>
+    </form>
+  </div>
+
+  <div class="card card-outline card-primary log-card">
+    <div class="card-header d-flex align-items-center"><h2 class="card-title me-auto"><i class="bi bi-journal-text me-2"></i>Request history <span class="badge text-bg-secondary">{{ total }}</span></h2><span class="text-body-secondary small">Page {{ filters.page }} of {{ totalPages }}</span></div>
+    <div class="card-body p-0 table-responsive">
+      <table class="table table-hover align-middle mb-0"><thead><tr><th class="row-number">#</th><th>Time</th><th>User / action</th><th>Request</th><th>Status</th><th>Duration</th><th class="text-end">Details</th></tr></thead><tbody>
+        @for (log of logs; track log.id) {
+          <tr [class.selected-row]="expandedId === log.id">
+            <td class="row-number">{{ ($index + 1) + ((filters.page - 1) * filters.limit) }}</td>
+            <td class="time-cell">{{ log.timestamp | date:'medium' }}</td>
+            <td><strong>{{ log.username || log.user_name || 'Anonymous' }}</strong><small class="d-block text-body-secondary">{{ log.message || log.action || 'Request' }}</small></td>
+            <td><span class="method-badge">{{ log.http_method }}</span><code>{{ log.http_path }}</code></td>
+            <td><span class="badge" [class]="statusClass(log.http_status)">{{ log.http_status || 'N/A' }}</span><span class="badge ms-1" [class]="levelClass(log.level)">{{ log.level }}</span></td>
+            <td>{{ log.duration_ms === null ? 'N/A' : log.duration_ms + ' ms' }}</td>
+            <td class="text-end"><button class="btn btn-sm btn-outline-secondary" type="button" [attr.aria-expanded]="expandedId === log.id" (click)="toggleDetails(log)"><i class="bi" [class.bi-chevron-down]="expandedId === log.id" [class.bi-chevron-right]="expandedId !== log.id"></i><span class="visually-hidden">Toggle details</span></button></td>
+          </tr>
+          @if (expandedId === log.id) {
+            <tr class="details-row"><td colspan="7"><div class="details-grid"><div class="detail-wide"><span class="detail-label">Message</span><strong>{{ log.message || 'No message' }}</strong></div><div><span class="detail-label">Entity</span><strong>{{ log.entity_type || 'None' }}{{ log.entity_id ? ' #' + log.entity_id : '' }}</strong></div><div><span class="detail-label">Client</span><strong>{{ log.ip_address || 'Unknown IP' }}</strong></div><div><span class="detail-label">Request ID</span><code>{{ log.request_id || 'None' }}</code></div><div><span class="detail-label">Session ID</span><code>{{ log.session_id || 'None' }}</code></div><div class="detail-wide"><span class="detail-label">Changed fields</span><code>{{ changedFields(log) }}</code></div>@if (log.error_type || log.error_code) {<div class="detail-wide error-detail"><span class="detail-label">Error</span><strong>{{ log.error_type || log.error_code }}</strong></div>}@if (log.stack_trace) {<div class="detail-wide"><span class="detail-label">Stack trace</span><pre>{{ log.stack_trace }}</pre></div>}</div></td></tr>
+          }
+        } @empty { @if (!loading) { <tr><td colspan="7" class="empty-state">No activity logs match the selected filters.</td></tr> } }
+      </tbody></table>
+      @if (loading) { <div class="loading-state"><span class="spinner-border spinner-border-sm me-2"></span>Loading activity logs...</div> }
+    </div>
+    <div class="tabulator-footer"><div class="tabulator-footer-contents"><span class="tabulator-paginator"><label for="activity-page-size">Page Size</label><select id="activity-page-size" class="tabulator-page-size" aria-label="Page Size" title="Page Size" [value]="filters.limit" (change)="changePageSize($any($event.target).value)">@for (size of pageSizes; track size) {<option [value]="size">{{ size }}</option>}</select><button class="tabulator-page" type="button" aria-label="First Page" title="First Page" [disabled]="filters.page <= 1" (click)="goToPage(1)">First</button><button class="tabulator-page" type="button" aria-label="Prev Page" title="Prev Page" [disabled]="filters.page <= 1" (click)="goToPage(filters.page - 1)">Prev</button><span class="tabulator-pages">@for (pageItem of pageItems; track $index) {@if (pageItem === 'ellipsis') {<span class="tabulator-ellipsis">...</span>} @else {<button class="tabulator-page" [class.active]="pageItem === filters.page" type="button" [attr.aria-label]="'Show Page ' + pageItem" [attr.title]="'Show Page ' + pageItem" (click)="goToPage(pageItem)">{{ pageItem }}</button>}}</span><button class="tabulator-page" type="button" aria-label="Next Page" title="Next Page" [disabled]="filters.page >= totalPages" (click)="goToPage(filters.page + 1)">Next</button><button class="tabulator-page" type="button" aria-label="Last Page" title="Last Page" [disabled]="filters.page >= totalPages" (click)="goToPage(totalPages)">Last</button></span><span class="text-body-secondary small">Showing {{ logs.length }} of {{ total }} records</span></div></div>
+  </div>
+</section>

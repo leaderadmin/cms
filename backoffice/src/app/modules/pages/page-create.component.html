@@ -1,0 +1,20 @@
+<app-backoffice-page eyebrow="BUILD PAGE / NEW PAGE" title="Tạo page mới" description="Hoàn thành từng bước để tạo page, sau đó thêm composite component trong editor." [loading]="loading" [error]="error" (retry)="cancel()">
+  <div page-actions><button class="btn btn-light" type="button" (click)="cancel()"><i class="bi bi-arrow-left me-1"></i>Quay lại Pages</button></div>
+  <section class="wizard-card">
+    <div class="wizard-progress" aria-label="Page creation steps">
+      <div class="progress-line"><span [style.width.%]="((step - 1) / 2) * 100"></span></div>
+      @for (item of [{number: 1, label: 'Thông tin'}, {number: 2, label: 'Template'}, {number: 3, label: 'Xác nhận'}]; track item.number) {
+        <div class="step" [class.active]="step === item.number" [class.complete]="step > item.number"><span class="step-number">{{ step > item.number ? '✓' : item.number }}</span><span>{{ item.label }}</span></div>
+      }
+    </div>
+
+    @if (step === 1) {
+      <div class="wizard-body"><span class="eyebrow">STEP 1 / 3</span><h2>Thông tin cơ bản</h2><p class="step-description">Đặt tên và đường dẫn để người dùng nhận diện page.</p><div class="create-fields"><label>Tên page<input class="form-control" [(ngModel)]="form.name" placeholder="Landing page"></label><label>Slug<input class="form-control" [(ngModel)]="form.slug" placeholder="landing-page"></label></div></div>
+    } @else if (step === 2) {
+      <div class="wizard-body"><span class="eyebrow">STEP 2 / 3</span><h2>Chọn template</h2><p class="step-description">Template quyết định các vùng nội dung có thể sử dụng trong editor.</p><div class="template-grid">@for (template of templates; track template.id) {<button type="button" class="template-option" [class.selected]="form.template_key === template.key" (click)="form.template_key = template.key"><span class="template-icon"><i class="bi bi-layout-text-window-reverse"></i></span><span><strong>{{ template.name }}</strong><small>{{ template.key }} · {{ template.regions.length }} vùng nội dung</small></span><i class="bi" [class.bi-check-circle-fill]="form.template_key === template.key" [class.bi-circle]="form.template_key !== template.key"></i></button>}</div></div>
+    } @else {
+      <div class="wizard-body"><span class="eyebrow">STEP 3 / 3</span><h2>Xác nhận page</h2><p class="step-description">Kiểm tra thông tin trước khi tạo. Bạn có thể thêm component ở bước tiếp theo.</p><div class="review-list"><div><span>Tên page</span><strong>{{ form.name }}</strong></div><div><span>Slug</span><strong>/{{ form.slug }}</strong></div><div><span>Template</span><strong>{{ selectedTemplateName }}</strong></div><div><span>Trạng thái</span><strong class="status-pill">{{ form.status }}</strong></div></div><div class="template-hint"><i class="bi bi-info-circle"></i><span>Page sẽ được tạo ở trạng thái {{ form.status }} và mở ngay màn hình editor.</span></div></div>
+    }
+    <div class="wizard-footer"><button class="btn btn-light" type="button" (click)="step === 1 ? cancel() : back()"><i class="bi" [class.bi-arrow-left]="step > 1" [class.bi-x-lg]="step === 1"></i>{{ step === 1 ? 'Hủy' : 'Quay lại' }}</button>@if (step < 3) {<button class="btn btn-primary" type="button" (click)="next()">Tiếp tục<i class="bi bi-arrow-right ms-2"></i></button>} @else {<button class="btn btn-primary" type="button" (click)="save()" [disabled]="saving"><i class="bi bi-check2 me-1"></i>{{ saving ? 'Đang tạo...' : 'Tạo page' }}</button>}</div>
+  </section>
+</app-backoffice-page>

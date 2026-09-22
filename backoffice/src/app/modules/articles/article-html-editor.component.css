@@ -1,0 +1,13 @@
+.html-editor { border: 1px solid #ced4da; border-radius: .25rem; overflow: hidden; }
+.html-toolbar { align-items: center; background: #f8f9fa; border-bottom: 1px solid #ced4da; display: flex; flex-wrap: wrap; gap: .25rem; padding: .4rem; }
+.html-toolbar button { background: #fff; border: 1px solid #d0d5dd; border-radius: .25rem; color: #344054; font-size: .8rem; min-height: 30px; min-width: 30px; padding: .2rem .45rem; }
+.html-toolbar button:hover, .html-toolbar button.active { background: #e8f0ff; border-color: #7da2df; color: #174ea6; }
+.html-toolbar .source-toggle { margin-left: auto; }
+.source-toggle { background: #f4f6f9; border: 0; color: #495057; cursor: pointer; display: block; font-size: .8rem; padding: .5rem .75rem; text-align: right; width: 100%; }
+.source-toggle:hover, .source-toggle.active { background: #e9f2f9; color: #27749d; }
+.html-canvas, .html-source { background: #fff; box-sizing: border-box; min-height: 280px; padding: .85rem; width: 100%; }
+.html-canvas { outline: none; }
+.html-canvas.ql-container { border: 0; font-size: .95rem; }
+.html-canvas .ql-editor { min-height: 280px; }
+.html-canvas:focus { box-shadow: inset 0 0 0 2px #9ec5fe; }
+.html-source { border: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .82rem; outline: none; resize: vertical; }

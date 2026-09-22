@@ -1,0 +1,96 @@
+@if (user; as account) {
+  <section class="profile-page" aria-labelledby="profile-title">
+    <div class="profile-cover"></div>
+    <div class="profile-layout">
+      <article class="card profile-card">
+        <label class="profile-avatar" for="avatar-file" [class.has-image]="profile.avatar_url">@if (profile.avatar_url) { <img [src]="profile.avatar_url" [alt]="account.username"> } @else { <span>{{ initials }}</span> }<input id="avatar-file" type="file" accept="image/png,image/jpeg,image/gif,image/webp" (change)="uploadAvatar($event)" [disabled]="avatarUploading" aria-label="Upload avatar"></label>
+        <h1 id="profile-title">{{ account.username }}</h1>
+        <p class="profile-email">{{ account.email || 'No email configured' }}</p>
+        <span class="badge rounded-pill text-bg-success">{{ accountType }}</span>
+        <div class="profile-divider"></div>
+        <dl class="profile-facts">
+          <div><dt>Roles</dt><dd>{{ account.roles.length }}</dd></div>
+          <div><dt>Permissions</dt><dd>{{ account.permissions.length }}</dd></div>
+          <div><dt>Account ID</dt><dd>#{{ account.id }}</dd></div>
+        </dl>
+      </article>
+
+      <div class="profile-content">
+        <div class="card card-primary card-outline">
+          <div class="card-header p-0">
+            <ul class="nav nav-tabs" role="tablist">
+              <li class="nav-item"><button class="nav-link" [class.active]="activeTab === 'about'" type="button" role="tab" [attr.aria-selected]="activeTab === 'about'" (click)="selectTab('about')">About</button></li>
+              <li class="nav-item"><button class="nav-link" [class.active]="activeTab === 'permissions'" type="button" role="tab" [attr.aria-selected]="activeTab === 'permissions'" (click)="selectTab('permissions')">Roles &amp; permissions</button></li>
+            </ul>
+          </div>
+          @if (activeTab === 'about') { <div class="card-body">
+            <h2 class="section-title">Account information</h2>
+            <div class="info-grid">
+              <div class="info-item"><span class="info-label">Username</span><strong>{{ account.username }}</strong></div>
+              <div class="info-item"><span class="info-label">Email address</span><strong>{{ account.email || 'Not configured' }}</strong></div>
+              <div class="info-item"><span class="info-label">Account status</span><strong class="text-success">Active</strong></div>
+              <div class="info-item"><span class="info-label">Access level</span><strong>{{ accountType }}</strong></div>
+            </div>
+            @if (profile.bio) { <div class="bio-block"><span class="info-label">Bio</span><p>{{ profile.bio }}</p></div> }
+          </div> }
+        </div>
+
+        @if (activeTab === 'about') { <div class="card profile-edit-card">
+          <div class="card-header"><div><h2 class="card-title">Profile information</h2><p class="card-subtitle">Personal details and workspace preferences</p></div></div>
+          @if (loading) { <div class="card-body text-muted">Loading profile settings...</div> } @else {
+          <form class="card-body profile-form" (ngSubmit)="saveProfile()">
+            <div class="profile-form-grid">
+              <div><label for="display-name">Display name</label><input id="display-name" name="display_name" class="form-control" [(ngModel)]="profile.display_name" placeholder="Your name"></div>
+              <div><label for="job-title">Job title</label><input id="job-title" name="job_title" class="form-control" [(ngModel)]="profile.job_title" placeholder="e.g. Operations manager"></div>
+              <div><label for="profile-email">Email address</label><input id="profile-email" name="email" type="email" class="form-control" [(ngModel)]="profile.email"></div>
+              <div><label for="profile-phone">Phone</label><input id="profile-phone" name="phone" class="form-control" [(ngModel)]="profile.phone"></div>
+              <div><label for="profile-location">Location</label><input id="profile-location" name="location" class="form-control" [(ngModel)]="profile.location"></div>
+              <div><label for="profile-timezone">Timezone</label><select id="profile-timezone" name="timezone" class="form-select" [(ngModel)]="profile.timezone"><option value="UTC">UTC</option><option value="Asia/Ho_Chi_Minh">Asia/Ho_Chi_Minh</option><option value="Asia/Tokyo">Asia/Tokyo</option><option value="America/New_York">America/New_York</option><option value="Europe/London">Europe/London</option></select></div>
+              <div><label for="profile-date-format">Date format</label><select id="profile-date-format" name="date_format" class="form-select" [(ngModel)]="profile.date_format"><option value="MMM d, yyyy">Jan 24, 2026</option><option value="dd/MM/yyyy">24/01/2026</option><option value="yyyy-MM-dd">2026-01-24</option></select></div>
+              <div class="profile-field-wide"><label for="profile-bio">Bio</label><textarea id="profile-bio" name="bio" class="form-control" rows="4" maxlength="1000" [(ngModel)]="profile.bio" placeholder="Tell your team a little about yourself"></textarea><small>{{ profile.bio.length }}/1000</small></div>
+            </div>
+            <div class="profile-preferences"><label class="form-check"><input class="form-check-input" type="checkbox" name="email_notifications" [(ngModel)]="profile.email_notifications"><span>Email notifications</span></label><label class="form-check"><input class="form-check-input" type="checkbox" name="security_alerts" [(ngModel)]="profile.security_alerts"><span>Security alerts</span></label><label class="form-check"><input class="form-check-input" type="checkbox" name="compact_mode" [(ngModel)]="profile.compact_mode"><span>Compact workspace</span></label></div>
+            @if (error) { <div class="alert alert-danger py-2">{{ error }}</div> } @if (status) { <div class="alert alert-success py-2">{{ status }}</div> }
+            <div class="profile-form-actions"><button class="btn btn-primary" type="submit" [disabled]="saving">{{ saving ? 'Saving...' : 'Save profile' }}</button></div>
+          </form> }
+        </div> }
+
+        @if (activeTab === 'about') { <div class="card security-card">
+          <div class="card-header"><div><h2 class="card-title">Security</h2><p class="card-subtitle">Change password for <strong>{{ account.username }}</strong> ({{ account.email || 'no email configured' }}).</p></div><i class="bi bi-shield-lock security-icon" aria-hidden="true"></i></div>
+          <form class="card-body password-form" (ngSubmit)="changePassword()">
+            <div class="password-grid"><div><label for="current-password">Current password</label><input id="current-password" name="current_password" class="form-control" type="password" autocomplete="current-password" [(ngModel)]="passwordForm.current_password" required></div><div><label for="new-password">New password</label><input id="new-password" name="new_password" class="form-control" type="password" minlength="8" autocomplete="new-password" [(ngModel)]="passwordForm.new_password" required></div><div><label for="confirm-password">Confirm new password</label><input id="confirm-password" name="confirm_password" class="form-control" type="password" minlength="8" autocomplete="new-password" [(ngModel)]="passwordForm.confirm_password" required></div></div>
+            <small class="password-hint">Use at least 8 characters. All other active sessions will be revoked after the change.</small>
+            @if (passwordError) { <div class="alert alert-danger py-2">{{ passwordError }}</div> } @if (passwordStatus) { <div class="alert alert-success py-2">{{ passwordStatus }}</div> }
+            <div class="profile-form-actions"><button class="btn btn-outline-primary" type="submit" [disabled]="passwordSaving">{{ passwordSaving ? 'Changing...' : 'Change password' }}</button></div>
+          </form>
+        </div> }
+
+        @if (activeTab === 'permissions') { <div class="card permissions-card">
+          <div class="card-header"><h2 class="card-title">Assigned roles</h2><span class="text-muted">{{ account.roles.length }} total</span></div>
+          <div class="card-body">
+            <div class="role-list">
+              @for (role of account.roles; track role) {
+                <span class="role-chip"><i class="bi bi-shield-check" aria-hidden="true"></i>{{ role }}</span>
+              } @empty {
+                <p class="text-muted mb-0">No roles assigned.</p>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="card permissions-card">
+          <div class="card-header"><h2 class="card-title">Route permissions</h2><span class="text-muted">{{ account.permissions.length }} total</span></div>
+          <div class="card-body">
+            <div class="permission-list">
+              @for (permission of account.permissions; track permission) {
+                <span class="permission-chip">{{ permission }}</span>
+              } @empty {
+                <p class="text-muted mb-0">No route permissions assigned.</p>
+              }
+            </div>
+          </div>
+        </div> }
+      </div>
+    </div>
+  </section>
+}

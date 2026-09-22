@@ -1,0 +1,19 @@
+.page-actions { display: flex; gap: .5rem; }
+.edit-panel { background: #fff; border: 1px solid #dee2e6; border-radius: .25rem; box-shadow: 0 1px 2px rgba(0, 0, 0, .04); margin-top: 1.5rem; padding: 1.25rem; }
+.editor-grid { display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.editor-grid label { color: #495057; font-size: .78rem; font-weight: 600; }
+.editor-grid input, .editor-grid select, .editor-grid textarea { background-color: #fff; border-color: #ced4da; border-radius: .25rem; font-weight: 400; margin-top: .35rem; }
+.editor-grid input:focus, .editor-grid select:focus, .editor-grid textarea:focus { border-color: #80bdff; box-shadow: 0 0 0 .2rem rgba(60, 141, 188, .2); }
+.editor-grid .wide { grid-column: 1 / -1; }
+.editor-grid select[multiple] { min-height: 7rem; }
+.content-editor { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .82rem; }
+.editor-actions { border-top: 1px solid #dee2e6; display: flex; justify-content: flex-end; margin-top: 1.25rem; padding-top: 1.1rem; }
+.conversion-panel { background: #fff; border: 1px solid #ced4da; border-radius: .25rem; padding: 0; }
+.conversion-panel summary { align-items: center; background: #f4f6f9; color: #495057; cursor: pointer; display: flex; gap: .65rem; list-style: none; padding: .75rem 1rem; }
+.conversion-panel summary::-webkit-details-marker { display: none; }
+.conversion-panel summary > i { align-items: center; background: #3c8dbc; border-radius: .25rem; color: #fff; display: flex; height: 32px; justify-content: center; width: 32px; }
+.conversion-panel summary span { display: grid; gap: .15rem; }
+.conversion-panel summary small { color: #667085; font-size: .75rem; font-weight: 400; }
+.conversion-grid { border-top: 1px solid #dee2e6; display: grid; gap: 1rem; grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 1rem; }
+.conversion-grid label:last-child { max-width: 50%; }
+@media (max-width: 760px) { .editor-grid { grid-template-columns: 1fr; } .editor-grid .wide { grid-column: auto; } }

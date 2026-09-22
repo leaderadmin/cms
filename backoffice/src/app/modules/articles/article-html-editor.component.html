@@ -1,0 +1,8 @@
+<div class="html-editor">
+  <button type="button" class="source-toggle" [class.active]="sourceMode" (click)="toggleSource()">&lt;/&gt; HTML source</button>
+  @if (sourceMode) {
+    <textarea class="html-source" rows="16" [(ngModel)]="source" (ngModelChange)="updateSource()" aria-label="HTML source"></textarea>
+  } @else {
+    <div #editor class="html-canvas" aria-label="Article HTML content"></div>
+  }
+</div>

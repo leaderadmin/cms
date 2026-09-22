@@ -1,0 +1,23 @@
+.page-actions { display: flex; gap: .5rem; }
+.category-toolbar { align-items: center; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(31, 41, 55, .05); display: grid; grid-template-columns: minmax(220px, 1fr) 150px 150px auto; gap: .65rem; margin: 1.5rem 0 1rem; padding: .7rem; }
+.category-table { border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; box-shadow: 0 10px 30px rgba(31, 41, 55, .05); overflow: hidden; }
+.category-table thead { background: #f8fafc; }
+.category-table th { border-bottom: 1px solid #e5e7eb; color: #667085; font-size: .7rem; font-weight: 700; letter-spacing: .06em; padding: .8rem .75rem; text-transform: uppercase; white-space: nowrap; }
+.category-table td { border-color: #f0f2f5; padding: .85rem .75rem; }
+.category-table td small { display: block; color: #7c8494; margin-top: .2rem; }
+.category-editor { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(31, 41, 55, .05); margin: 1rem 0; padding: 1.1rem; }
+.editor-heading { align-items: flex-start; display: flex; justify-content: space-between; margin-bottom: 1rem; }
+.editor-heading h2 { font-size: 1.2rem; margin: .25rem 0 0; }
+.eyebrow { color: #667085; font-size: .7rem; font-weight: 700; letter-spacing: .08em; }
+.editor-grid { display: grid; gap: 1rem; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.editor-grid label { color: #475467; font-size: .82rem; font-weight: 700; }
+.editor-grid input, .editor-grid select, .editor-grid textarea { font-weight: 400; margin-top: .35rem; }
+.editor-grid .wide { grid-column: 1 / -1; }
+.editor-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
+.status-badge { background: #fff4e5; border-radius: 999px; color: #9a6700; display: inline-block; font-size: .75rem; font-weight: 700; padding: .2rem .55rem; text-transform: uppercase; }
+.status-badge.active { background: #e8f7ee; color: #18794e; }
+.empty-state { color: #667085; padding: 2rem; text-align: center; }
+.icon-button { background: transparent; border: 0; color: #475467; padding: .35rem; }
+.icon-button:hover { color: #111827; }
+.icon-button.danger:hover { color: #b42318; }
+@media (max-width: 760px) { .category-toolbar, .editor-grid { grid-template-columns: 1fr; } .editor-grid .wide { grid-column: auto; } }

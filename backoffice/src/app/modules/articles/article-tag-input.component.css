@@ -1,0 +1,6 @@
+.tag-input { background: #fff; border: 1px solid #ced4da; border-radius: .25rem; min-height: 38px; padding: .3rem .5rem; }
+.tag-input:focus-within { border-color: #80bdff; box-shadow: 0 0 0 .2rem rgba(60, 141, 188, .2); }
+.tag-list { align-items: center; display: flex; flex-wrap: wrap; gap: .35rem; }
+.tag-chip { background: #e8f5ee; border: 1px solid #b8dfc8; border-radius: .2rem; color: #287a49; font-size: .78rem; padding: .25rem .5rem; }
+.tag-chip button { background: transparent; border: 0; color: inherit; line-height: 1; padding: 0 0 0 .25rem; }
+.tag-entry { border: 0; flex: 1 1 150px; min-width: 150px; outline: none; padding: .25rem; }

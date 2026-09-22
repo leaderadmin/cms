@@ -1,0 +1,139 @@
+@if (!auth.user()) {
+  <main class="auth-shell">
+    <mat-card class="login-panel" appearance="outlined">
+      <p class="eyebrow">ANGULAR / BACKOFFICE</p>
+      <mat-card-title>{{ authMode === 'login' ? 'Welcome back.' : authMode === 'forgot' ? 'Reset your password.' : 'Create a new password.' }}</mat-card-title>
+      <mat-card-subtitle>{{ authMode === 'login' ? 'Sign in to monitor the API, Redis and scheduled jobs.' : authMode === 'forgot' ? 'We will email a one-time confirmation token.' : 'Enter the token from your email and choose a new password.' }}</mat-card-subtitle>
+      @if (error) {
+        <p class="form-error" role="alert"><strong>{{ authMode === 'login' ? 'Sign-in failed.' : 'Password reset failed.' }}</strong> {{ error }}</p>
+      }
+      @if (authMessage) { <p class="form-success" role="status">{{ authMessage }}</p> }
+      @if (authMode === 'forgot') {
+        <form class="login-form" (ngSubmit)="requestPasswordReset()"><mat-form-field appearance="outline"><mat-label>Username</mat-label><input matInput id="reset-username" name="reset_username" [(ngModel)]="resetUsername" autocomplete="username" required></mat-form-field><mat-form-field appearance="outline"><mat-label>Email address</mat-label><input matInput id="reset-email" name="reset_email" type="email" [(ngModel)]="resetEmail" (input)="resetEmail = $any($event.target).value" autocomplete="email" required></mat-form-field><button mat-flat-button color="primary" class="primary-action" type="submit" [disabled]="resetLoading">{{ resetLoading ? 'Sending...' : 'Send reset token' }}</button><button mat-button type="button" (click)="showLogin()">Back to sign in</button></form>
+      } @else if (authMode === 'reset') {
+        <form class="login-form" (ngSubmit)="confirmPasswordReset()"><mat-form-field appearance="outline"><mat-label>Confirmation token</mat-label><input matInput id="reset-token" name="reset_token" [(ngModel)]="resetToken" required></mat-form-field><mat-form-field appearance="outline"><mat-label>New password</mat-label><input matInput id="reset-password" name="reset_password" type="password" [(ngModel)]="resetPassword" autocomplete="new-password" minlength="8" required></mat-form-field><mat-form-field appearance="outline"><mat-label>Confirm new password</mat-label><input matInput id="reset-confirm-password" name="reset_confirm_password" type="password" [(ngModel)]="resetConfirmPassword" autocomplete="new-password" minlength="8" required></mat-form-field><button mat-flat-button color="primary" class="primary-action" type="submit" [disabled]="resetLoading">{{ resetLoading ? 'Resetting...' : 'Reset password' }}</button><button mat-button type="button" (click)="showLogin()">Back to sign in</button></form>
+      } @else {
+      <form class="login-form" (ngSubmit)="login()">
+        <mat-form-field appearance="outline">
+          <mat-label>Username</mat-label>
+          <input matInput id="username" name="username" [(ngModel)]="username" autocomplete="username" required>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <input matInput id="password" name="password" [(ngModel)]="password" type="password" autocomplete="current-password" required>
+        </mat-form-field>
+        <label class="remember-login"><input type="checkbox" name="remember_me" [(ngModel)]="rememberMe" (ngModelChange)="rememberLoginChanged()"> Save username and password on this device</label>
+        <button mat-flat-button color="primary" class="primary-action" type="submit" [disabled]="loggingIn">
+          {{ loggingIn ? 'Signing in...' : 'Sign in' }}
+        </button>
+      </form>
+      <button mat-button type="button" class="forgot-action" (click)="showForgot()">Forgot password?</button>
+      }
+      <mat-card-footer class="hint">Demo: <code>demo-admin</code> / <code>DemoAdmin123!</code></mat-card-footer>
+    </mat-card>
+  </main>
+} @else {
+  <app-backoffice-shell [navigation]="navigation" (signOut)="logout()" (navigate)="selectView($event)">
+    @if (view === 'users') {
+      <app-user-management (createRequested)="selectView('user-create')"></app-user-management>
+    } @else if (view === 'user-create') {
+      <app-user-create (completed)="selectView('users')" (cancel)="selectView('users')"></app-user-create>
+    } @else if (view === 'profile') {
+      <app-profile></app-profile>
+    } @else if (view === 'menu-builder') {
+      <app-menu-builder></app-menu-builder>
+    } @else if (view === 'settings') {
+      <app-settings></app-settings>
+    } @else if (view === 'mail-settings') {
+      <app-settings [initialSection]="'mail'"></app-settings>
+    } @else if (view === 'activity') {
+      <app-activity-log></app-activity-log>
+    } @else if (view === 'roles') {
+      <app-role-management></app-role-management>
+    } @else if (view === 'entities') {
+      <app-entity-management></app-entity-management>
+    } @else if (view === 'media') {
+      <app-media-manager></app-media-manager>
+    } @else if (view === 'articles/new') {
+      <app-article-create></app-article-create>
+    } @else if (isArticleEditView()) {
+      <app-article-edit></app-article-edit>
+    } @else if (view === 'articles') {
+      <app-article-management></app-article-management>
+    } @else if (view === 'categories') {
+      <app-category-management></app-category-management>
+    } @else if (view === 'tags') {
+      <app-tag-management></app-tag-management>
+    } @else if (view === 'pages') {
+      <app-page-list></app-page-list>
+    } @else if (view === 'pages/new') {
+      <app-page-create></app-page-create>
+    } @else if (isPageEditView()) {
+      <app-page-builder [pageId]="pageIdFromView()"></app-page-builder>
+    } @else if (view === 'blocks') {
+      <app-block-management></app-block-management>
+    } @else if (view === 'components') {
+      <app-component-management></app-component-management>
+    } @else {
+    <app-backoffice-page
+      eyebrow="ANGULAR / BACKOFFICE / OPERATIONS"
+      title="Operations overview"
+      description="A live view of the API, Redis and scheduled jobs."
+      [loading]="loading"
+      [error]="error"
+      (retry)="refresh()">
+      <div page-actions>
+        <button mat-stroked-button class="refresh" type="button" (click)="refresh()" [disabled]="loading">
+          {{ loading ? 'Loading...' : 'Refresh data' }}
+        </button>
+      </div>
+
+      @if (!error) {
+      <section class="status-line">
+        <span class="pulse" [class.is-down]="health.redis !== 'ok'"></span>
+        API <strong>{{ health.status || 'checking...' }}</strong>
+        <span class="divider">·</span>
+        Redis <strong>{{ health.redis || 'checking...' }}</strong>
+      </section>
+      }
+
+      <section class="metrics" aria-label="Backoffice metrics">
+      <mat-card class="metric-card" appearance="outlined">
+        <span class="metric-label">API visits</span>
+        <strong class="metric-value">{{ stats.visits || 0 }}</strong>
+        <span class="metric-note">Stored in Redis</span>
+      </mat-card>
+      <mat-card class="metric-card accent" appearance="outlined">
+        <span class="metric-label">Last cron run</span>
+        <strong class="metric-value small">{{ stats.last_cron_run?.ran_at || 'Waiting for job' }}</strong>
+        <span class="metric-note">Managed by cron_service</span>
+      </mat-card>
+      </section>
+
+      <section class="details-grid">
+      <mat-card class="detail-panel" appearance="outlined">
+        <div class="panel-heading"><span class="metric-label">Identity</span><span class="panel-mark">01</span></div>
+        <h2>{{ auth.user()?.username }}</h2>
+        <p class="muted">{{ auth.user()?.email || 'No email configured' }}</p>
+        <mat-chip-set aria-label="Assigned roles">
+          @for (role of auth.user()?.roles || []; track role) { <mat-chip>{{ role }}</mat-chip> }
+        </mat-chip-set>
+        <p class="permission-count">{{ auth.user()?.permissions?.length || 0 }} route permissions granted</p>
+      </mat-card>
+      <mat-card class="detail-panel" appearance="outlined">
+        <div class="panel-heading"><span class="metric-label">Active sessions</span><span class="panel-mark">02</span></div>
+        <div class="session-list">
+          @for (session of sessions; track session.session_id) {
+            <div class="session-row">
+              <span class="pulse" [class.is-down]="!session.active"></span>
+              <span><strong>{{ session.user_agent || 'Unknown client' }}</strong><small>{{ session.ip_address || 'Local address' }}</small></span>
+              <span class="session-state">{{ session.active ? 'Active' : 'Revoked' }}</span>
+            </div>
+          } @empty { <p class="muted">No sessions found.</p> }
+        </div>
+      </mat-card>
+      </section>
+    </app-backoffice-page>
+    }
+  </app-backoffice-shell>
+}

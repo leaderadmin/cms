@@ -1,0 +1,55 @@
+<app-backoffice-page eyebrow="CONTENT / ARTICLES" title="Article management" description="Review legacy-ready articles, translations and publication state." [loading]="loading" [error]="error" (retry)="load()">
+  <div page-actions class="page-actions">
+    @if (can('article.create')) { <button class="btn btn-primary" type="button" (click)="startCreate()"><i class="bi bi-plus-lg"></i> New article</button> }
+    <button class="btn btn-dark" type="button" (click)="load()" [disabled]="loading"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+  </div>
+
+  <section class="article-toolbar" aria-label="Article filters">
+    <input class="form-control" type="search" placeholder="Search title or article name" [(ngModel)]="query" (keyup.enter)="load()">
+    <select class="form-select" [(ngModel)]="language" (change)="load(1)" aria-label="Language">
+      <option value="vi">Vietnamese</option>
+      <option value="en">English</option>
+      <option value="">All languages</option>
+    </select>
+    <select class="form-select" [(ngModel)]="status" (change)="load(1)" aria-label="Status">
+      <option value="">All statuses</option>
+      <option value="1">Active</option>
+      <option value="2">Pending</option>
+      <option value="-1">Deleted</option>
+    </select>
+    <button class="btn btn-outline-secondary" type="button" (click)="load(1)"><i class="bi bi-search"></i> Search</button>
+  </section>
+
+  <div class="article-summary"><strong>{{ total }}</strong> articles in this view <span>Page {{ page }} of {{ totalPages }}</span></div>
+  <div class="table-responsive article-table">
+    <table class="table align-middle">
+      <thead><tr><th>Article</th><th>Language</th><th>Status</th><th>Category / tags</th><th>Published</th><th>Views</th><th></th></tr></thead>
+      <tbody>
+        @for (article of articles; track article.id) {
+          <tr>
+            <td class="article-cell"><span class="article-thumb">@if (article.image && thumbnailUrl(article)) { <img [src]="thumbnailUrl(article)" [alt]="article.image.name"> } @else { <i class="bi bi-image"></i> }</span><span><strong>{{ article.translation?.title || article.name }}</strong><small>{{ article.name }} · {{ article.legacy_id || 'local' }}</small></span></td>
+            <td><span class="language-badge">{{ article.translation?.language_code || 'n/a' }}</span><small>{{ article.translations.length }} translation(s)</small></td>
+            <td><span class="status-badge" [class.active]="article.status === 1" [class.pending]="article.status === 2">{{ article.status_label }}</span></td>
+            <td><strong>{{ categoryNames(article) }}</strong><small class="tag-line">{{ article.tags.length ? article.tags.join(' · ') : 'No tags' }}</small><small class="conversion-state"><i class="bi" [class.bi-check-circle-fill]="article.cta || article.translation?.seo_title" [class.bi-dash-circle]="!article.cta && !article.translation?.seo_title"></i> {{ article.cta || article.translation?.seo_title ? 'SEO / CTA ready' : 'SEO / CTA missing' }}</small></td>
+            <td>{{ article.public_date ? (article.public_date | date:'mediumDate') : 'Not scheduled' }}</td>
+            <td>{{ article.view_count | number }}</td>
+            <td class="row-actions">
+              @if (can('article.update')) { <button class="icon-button" type="button" title="Edit article" (click)="startEdit(article)"><i class="bi bi-pencil"></i></button> }
+              @if (can('article.publish') && article.status !== 1) { <button class="icon-button" type="button" title="Publish article" (click)="publish(article)"><i class="bi bi-send"></i></button> }
+              @if (can('article.delete') && article.status !== -1) { <button class="icon-button danger" type="button" title="Archive article" (click)="archive(article)"><i class="bi bi-archive"></i></button> }
+            </td>
+          </tr>
+        } @empty {
+          <tr><td colspan="7" class="empty-state">No articles match these filters.</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <nav class="article-pagination" aria-label="Article pages">
+    <button class="btn btn-outline-secondary" type="button" (click)="goToPage(page - 1)" [disabled]="page <= 1 || loading"><i class="bi bi-chevron-left"></i> Previous</button>
+    <span>Page {{ page }} / {{ totalPages }}</span>
+    <button class="btn btn-outline-secondary" type="button" (click)="goToPage(page + 1)" [disabled]="page >= totalPages || loading">Next <i class="bi bi-chevron-right"></i></button>
+  </nav>
+
+</app-backoffice-page>

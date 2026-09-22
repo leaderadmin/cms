@@ -1,0 +1,181 @@
+<section class="menu-builder" aria-labelledby="menu-builder-title">
+  <header class="builder-header">
+    <div>
+      <p class="eyebrow">SETTINGS / NAVIGATION</p>
+      <h1 id="menu-builder-title">Menu builder</h1>
+      <p class="text-muted">Create multiple navigation menus and manage each menu's items independently.</p>
+    </div>
+    <button class="btn btn-primary" type="button" (click)="cancelMenuEdit()">
+      <i class="bi bi-plus-lg me-1"></i>New menu
+    </button>
+  </header>
+
+  @if (error) {
+    <div class="alert alert-danger" role="alert">{{ error }}</div>
+  }
+
+  <div class="builder-grid">
+    <aside class="card menu-list-card">
+      <div class="card-header">
+        <h2 class="card-title">Menus</h2>
+        <span class="text-muted">{{ menus.length }}</span>
+      </div>
+      <div class="card-body menu-list">
+        @for (menu of menus; track menu.id) {
+          <div class="menu-list-item" [class.selected]="selectedMenuId === menu.id">
+            <button type="button" class="menu-select" (click)="selectMenu(menu.id)">
+              <strong>{{ menu.name }}</strong>
+              <small>{{ menu.slug }}</small>
+            </button>
+            <button class="icon-action" type="button" title="Edit menu" (click)="editMenu(menu)">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="icon-action danger" type="button" title="Delete menu" (click)="removeMenu(menu)">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        } @empty {
+          <p class="empty-state">No menus yet. Create the first menu.</p>
+        }
+      </div>
+    </aside>
+
+    <div class="content-column">
+      @if (menuEditorOpen) {
+        <div class="modal fade show menu-modal" tabindex="-1" role="dialog" aria-modal="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <form class="modal-content" (ngSubmit)="saveMenu()">
+              <div class="modal-header">
+                <h2 class="modal-title">{{ editingMenuId ? 'Edit menu' : 'Create menu' }}</h2>
+                <button type="button" class="btn-close" aria-label="Close" (click)="closeMenuEdit()"></button>
+              </div>
+              <div class="modal-body menu-form-fields">
+                <label class="form-label">
+                  Menu name
+                  <input class="form-control" name="menu-name" [(ngModel)]="menuForm.name" required>
+                </label>
+                <label class="form-label">
+                  Slug
+                  <input class="form-control" name="menu-slug" [(ngModel)]="menuForm.slug" placeholder="main" required>
+                </label>
+                <div class="form-check">
+                  <input class="form-check-input" id="menu-group-active" name="menu-active" type="checkbox" [(ngModel)]="menuForm.is_active">
+                  <label class="form-check-label" for="menu-group-active">Available for use</label>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button class="btn btn-primary" type="submit" [disabled]="saving || !menuForm.name.trim() || !menuForm.slug.trim()">Save menu</button>
+                <button class="btn btn-outline-secondary" type="button" (click)="closeMenuEdit()">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="modal-backdrop fade show" (click)="closeMenuEdit()"></div>
+      }
+
+      @if (selectedMenuId) {
+        <div class="card tree-card">
+          <div class="card-header tree-card-header">
+            <div>
+              <h2 class="card-title">{{ selectedMenu?.name }} navigation</h2>
+              <span class="text-muted">{{ items.length }} items</span>
+            </div>
+            <button class="btn btn-primary" type="button" (click)="openCreateItem()">
+              <i class="bi bi-plus-lg me-1"></i>Add item
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="menu-tree" (dragover)="allowDrop($event)">
+              @if (draggedItem) {
+                <div class="drag-status"><i class="bi bi-arrows-move me-1"></i>Moving <strong>{{ draggedItem.label }}</strong></div>
+              }
+              <div class="root-drop-slot" [class.is-active]="rootDropIndex === 0" (dragover)="allowRootPosition($event, 0)" (drop)="dropOnRootAt($event, 0)"></div>
+              @for (item of roots; track item.id) {
+                <div class="tree-node" draggable="true" [class.is-drop-target]="dragOverId === item.id" (dragstart)="startDrag(item, $event)" (dragend)="endDrag()" (dragover)="$event.stopPropagation(); allowDrop($event, item)" (drop)="dropOn($event, item)">
+                  <div class="node-row" [class.is-dragging]="draggedItem?.id === item.id">
+                    <i class="bi bi-grip-vertical drag-handle"></i>
+                    <i [class]="iconClass(item.icon)"></i>
+                    <strong>{{ item.label }}</strong>
+                    <span class="node-meta">Top level</span>
+                    <button class="icon-action" type="button" title="Edit" (click)="edit(item)"><i class="bi bi-pencil"></i></button>
+                    <button class="icon-action danger" type="button" title="Delete" (click)="remove(item)"><i class="bi bi-trash"></i></button>
+                  </div>
+                  @for (child of childrenOf(item.id); track child.id) {
+                    <div class="tree-node child-node" draggable="true" (dragstart)="startDrag(child, $event)" (dragend)="endDrag()" (dragover)="$event.stopPropagation(); allowDrop($event, child)" (drop)="dropOn($event, child)">
+                      <div class="node-row">
+                        <i class="bi bi-grip-vertical drag-handle"></i>
+                        <i [class]="iconClass(child.icon)"></i>
+                        <strong>{{ child.label }}</strong>
+                        <span class="node-meta">{{ item.label }}</span>
+                        <button class="icon-action" type="button" title="Edit" (click)="edit(child)"><i class="bi bi-pencil"></i></button>
+                        <button class="icon-action danger" type="button" title="Delete" (click)="remove(child)"><i class="bi bi-trash"></i></button>
+                      </div>
+                    </div>
+                  }
+                  <div class="root-drop-slot" [class.is-active]="rootDropIndex === $index + 1" (dragover)="allowRootPosition($event, $index + 1)" (drop)="dropOnRootAt($event, $index + 1)"></div>
+                </div>
+              } @empty {
+                <p class="empty-state">No items in this menu yet.</p>
+              }
+            </div>
+          </div>
+        </div>
+
+        @if (itemEditorOpen) {
+          <div class="modal fade show menu-modal" tabindex="-1" role="dialog" aria-modal="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+              <form class="modal-content" (ngSubmit)="save()">
+                <div class="modal-header">
+                  <h2 class="modal-title">{{ editingId ? 'Edit menu item' : 'Add item to ' + selectedMenu?.name }}</h2>
+                  <button type="button" class="btn-close" aria-label="Close" (click)="cancelEdit()"></button>
+                </div>
+                <div class="modal-body">
+              <label class="form-label">
+                Label
+                <input class="form-control" name="label" [(ngModel)]="form.label" required>
+              </label>
+              <label class="form-label">
+                View
+                <input class="form-control" name="view" [(ngModel)]="form.view" placeholder="users">
+              </label>
+              <label class="form-label">
+                Href
+                <input class="form-control" name="href" [(ngModel)]="form.href" placeholder="#users">
+              </label>
+              <label class="form-label">
+                Bootstrap icon
+                <input class="form-control" name="icon" [(ngModel)]="form.icon" placeholder="bi-people">
+              </label>
+              <label class="form-label">
+                Required permission
+                <input class="form-control" name="permission" [(ngModel)]="form.required_permission" placeholder="auth.users.read">
+              </label>
+              <label class="form-label">
+                Parent
+                <select class="form-select" name="parent" [(ngModel)]="form.parent_id">
+                  <option [ngValue]="null">Top level</option>
+                  @for (item of roots; track item.id) {
+                    @if (item.id !== editingId) {
+                      <option [ngValue]="item.id">{{ item.label }}</option>
+                    }
+                  }
+                </select>
+              </label>
+              <div class="form-check mt-3">
+                <input class="form-check-input" id="menu-active" name="active" type="checkbox" [(ngModel)]="form.is_active">
+                <label class="form-check-label" for="menu-active">Visible in navigation</label>
+              </div>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-primary" type="submit" [disabled]="saving || !form.label.trim()">{{ saving ? 'Saving...' : 'Save item' }}</button>
+                  <button class="btn btn-outline-secondary" type="button" (click)="cancelEdit()">Cancel</button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="modal-backdrop fade show" (click)="cancelEdit()"></div>
+        }
+      }
+    </div>
+  </div>
+</section>

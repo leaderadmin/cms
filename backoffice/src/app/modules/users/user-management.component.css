@@ -1,0 +1,26 @@
+:host { display: block; }
+.data-table-card { border-top-width: 3px; }
+.data-table-card .card-header { background: var(--bs-tertiary-bg); }
+.data-table-card thead th { white-space: nowrap; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--bs-secondary-color); }
+.row-number { width: 48px; color: var(--bs-secondary-color); font-variant-numeric: tabular-nums; }
+.user-search { width: min(320px, 100%); }
+.role-select { width: 130px; }
+.role-badge { display: inline-block; padding: 4px 8px; border-radius: 999px; color: #185c64; background: #e4f2f0; font-size: .78rem; font-weight: 600; }
+.actions-cell { white-space: nowrap; }
+.edit-detail-row td { padding-top: 0; background: var(--bs-tertiary-bg); }
+.edit-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 12px 0 14px; }
+.edit-grid label { color: var(--bs-secondary-color); font-size: .75rem; font-weight: 600; }
+.edit-grid input, .edit-grid textarea { margin-top: 4px; font-weight: 400; }
+.wide-field { grid-column: 1 / -1; }
+.tabulator-footer { padding: 10px 14px; border-top: 1px solid var(--bs-border-color); background: var(--bs-tertiary-bg); }
+.tabulator-footer-contents { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.tabulator-paginator { display: flex; align-items: center; gap: 6px; color: var(--bs-secondary-color); font-size: .8rem; }
+.tabulator-page-size { min-width: 64px; padding: 4px 24px 4px 8px; border: 1px solid var(--bs-border-color); border-radius: 4px; color: var(--bs-body-color); background: var(--bs-body-bg); font-size: .8rem; }
+.tabulator-page { min-width: 34px; padding: 4px 9px; border: 1px solid var(--bs-border-color); border-radius: 4px; color: var(--bs-body-color); background: var(--bs-body-bg); font-size: .8rem; }
+.tabulator-page:hover:not(:disabled) { color: var(--bs-primary); border-color: var(--bs-primary); background: var(--bs-primary-bg-subtle); }
+.tabulator-page.active { color: #fff; border-color: var(--bs-primary); background: var(--bs-primary); }
+.tabulator-page:disabled { cursor: not-allowed; opacity: .5; }
+.tabulator-pages { display: flex; gap: 4px; }
+.tabulator-ellipsis { min-width: 20px; padding: 4px 0; color: var(--bs-secondary-color); text-align: center; }
+@media (max-width: 575.98px) { .card-header, .card-footer { flex-wrap: wrap; gap: .75rem; } .user-search { width: 100%; } }
+@media (max-width: 700px) { .tabulator-footer-contents { align-items: flex-start; flex-direction: column; } }

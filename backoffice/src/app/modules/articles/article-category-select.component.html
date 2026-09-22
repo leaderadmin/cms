@@ -1,0 +1,18 @@
+<div class="category-select" (click)="$event.stopPropagation()">
+  <button class="category-trigger" type="button" (click)="toggleOpen($event)" [attr.aria-expanded]="open">
+    @if (selectedCategories.length) {
+      <span class="category-chips">@for (category of selectedCategories; track category.id) { <span class="category-chip">{{ category.title || category.name }} <button type="button" (click)="remove(category); $event.stopPropagation()" aria-label="Remove category">&times;</button></span> }</span>
+    } @else { <span class="category-placeholder">Select a category...</span> }
+    <i class="bi" [class.bi-chevron-down]="!open" [class.bi-chevron-up]="open"></i>
+  </button>
+  @if (open) {
+    <div class="category-menu">
+      <input class="form-control category-search" type="search" placeholder="Search categories" [(ngModel)]="search" (click)="$event.stopPropagation()">
+      <div class="category-options">
+        @for (category of filteredCategories; track category.id) {
+          <label class="category-option"><input type="radio" name="article_category" [checked]="selectedIds[0] === category.id" (change)="toggle(category)"> <span>{{ category.title || category.name }}</span></label>
+        } @empty { <span class="category-empty">No categories found.</span> }
+      </div>
+    </div>
+  }
+</div>

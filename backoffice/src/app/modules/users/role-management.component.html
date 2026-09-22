@@ -1,0 +1,54 @@
+<app-backoffice-page
+  eyebrow="ANGULAR / BACKOFFICE / ACCESS"
+  [title]="showForm ? (form.id ? 'Edit role' : 'Create role') : 'Roles and permissions'"
+  description="Define reusable roles and control the permissions assigned to each role."
+  [loading]="loading"
+  [error]="error"
+  (retry)="load()">
+  <div page-actions>
+    @if (!showForm && can('auth.roles.create')) {<button class="btn btn-primary" type="button" (click)="editRole()"><i class="bi bi-shield-plus me-2"></i>New role</button>}
+    @if (showForm) {<button class="btn btn-outline-secondary" type="button" (click)="closeForm()"><i class="bi bi-arrow-left me-2"></i>Back to roles</button>}
+  </div>
+
+  @if (showForm) {
+    <form class="card card-outline card-primary mb-4" (ngSubmit)="saveRole()">
+      <div class="card-header"><h3 class="card-title">{{ form.id ? 'Edit role' : 'Create role' }}</h3></div>
+      <div class="card-body">
+        <label class="form-label" for="role-name">Role name</label>
+        <input id="role-name" class="form-control" name="roleName" [(ngModel)]="form.name" required>
+        <div class="permission-groups mt-4">
+          @for (group of permissionGroups; track group.module) {
+            <section class="card permission-group mb-0" [class.card-outline]="true" [attr.aria-labelledby]="'permission-group-' + group.module">
+              <div class="card-header permission-group-header"><h4 class="card-title" [id]="'permission-group-' + group.module"><i class="bi bi-folder2-open me-2"></i>{{ group.module }}</h4><div class="card-tools d-flex align-items-center gap-2"><span>{{ selectedCount(modulePermissionCodes(group)) }}/{{ modulePermissionCodes(group).length }} selected</span><button class="btn btn-tool permission-caret" type="button" [attr.aria-label]="(isModuleExpanded(group.module) ? 'Hide ' : 'Show ') + group.module + ' permissions'" [attr.title]="isModuleExpanded(group.module) ? 'Hide permissions' : 'Show permissions'" [attr.aria-expanded]="isModuleExpanded(group.module)" (click)="toggleModule(group.module)"><i class="bi" [class.bi-caret-down-fill]="isModuleExpanded(group.module)" [class.bi-caret-right-fill]="!isModuleExpanded(group.module)"></i></button></div></div>
+              @if (isModuleExpanded(group.module)) {
+              <div class="card-body permission-resources">
+                @for (resource of group.resources; track resource.name) {
+                  <section class="card card-outline card-secondary permission-resource mb-0">
+                    <div class="card-header permission-resource-header"><h5 class="card-title">{{ resource.name }}</h5><div class="resource-tools"><span>{{ selectedCount(resourcePermissionCodes(resource)) }}/{{ resource.permissions.length }} selected</span><label class="select-all-label"><input type="checkbox" [checked]="selectedCount(resourcePermissionCodes(resource)) === resource.permissions.length" [indeterminate]="selectedCount(resourcePermissionCodes(resource)) > 0 && selectedCount(resourcePermissionCodes(resource)) < resource.permissions.length" (change)="togglePermissions(resourcePermissionCodes(resource), $any($event.target).checked)"> Select all</label></div></div>
+                    <div class="card-body permission-options">
+                      @for (permission of resource.permissions; track permission.id) {
+                        <label class="permission-option"><input type="checkbox" [checked]="permissionSelected(permission.code)" (change)="togglePermission(permission.code, $any($event.target).checked)"><span><strong>{{ permissionAction(permission.code) }}</strong><small>{{ permission.route }}</small></span></label>
+                      }
+                    </div>
+                  </section>
+                }
+              </div>
+              }
+            </section>
+          }
+        </div>
+      </div>
+      <div class="card-footer text-end"><button class="btn btn-outline-secondary me-2" type="button" (click)="closeForm()">Cancel</button><button class="btn btn-primary" type="submit" [disabled]="saving || !form.name">{{ saving ? 'Saving...' : 'Save role' }}</button></div>
+    </form>
+  } @else {
+  <div class="card card-outline card-primary data-table-card">
+    <div class="card-header d-flex align-items-center"><h3 class="card-title me-auto"><i class="bi bi-shield-check me-2"></i>Configured roles <span class="badge text-bg-secondary">{{ roles.length }}</span></h3><span class="text-body-secondary small">Permission groups</span></div>
+    <div class="card-body p-0"><div class="table-responsive"><table class="table table-striped table-hover align-middle mb-0 roles-table"><thead><tr><th class="row-number">#</th><th>Role</th><th>Permissions</th><th class="text-end">Actions</th></tr></thead><tbody>
+      @for (role of pagedRoles; track role.id) {
+        <tr><td class="row-number">{{ (($index + 1) + ((page - 1) * pageSize)) }}</td><td><strong>{{ role.name }}</strong></td><td>@for (permission of role.permissions; track permission) {<span class="badge text-bg-light border me-1 mb-1">{{ permission }}</span>}</td><td class="text-end">@if (can('auth.roles.update')) {<button class="btn btn-sm btn-outline-secondary me-2" type="button" (click)="editRole(role)">Edit</button>} @if (can('auth.roles.delete')) {<button class="btn btn-sm btn-outline-danger" type="button" (click)="removeRole(role)">Delete</button>}</td></tr>
+      } @empty { <tr><td colspan="4" class="text-center text-body-secondary py-5">No roles configured.</td></tr> }
+    </tbody></table></div></div>
+    <div class="tabulator-footer"><div class="tabulator-footer-contents"><span class="tabulator-paginator"><label for="role-page-size">Page Size</label><select id="role-page-size" class="tabulator-page-size" aria-label="Page Size" title="Page Size" [value]="pageSize" (change)="changePageSize($any($event.target).value)"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select><button class="tabulator-page" type="button" aria-label="First Page" title="First Page" [disabled]="page <= 1" (click)="goToPage(1)">First</button><button class="tabulator-page" type="button" aria-label="Prev Page" title="Prev Page" [disabled]="page <= 1" (click)="goToPage(page - 1)">Prev</button><span class="tabulator-pages">@for (pageItem of pageItems; track $index) {@if (pageItem === 'ellipsis') {<span class="tabulator-ellipsis">...</span>} @else {<button class="tabulator-page" [class.active]="pageItem === page" type="button" [attr.aria-label]="'Show Page ' + pageItem" [attr.title]="'Show Page ' + pageItem" (click)="goToPage(pageItem)">{{ pageItem }}</button>}}</span><button class="tabulator-page" type="button" aria-label="Next Page" title="Next Page" [disabled]="page >= totalPages" (click)="goToPage(page + 1)">Next</button><button class="tabulator-page" type="button" aria-label="Last Page" title="Last Page" [disabled]="page >= totalPages" (click)="goToPage(totalPages)">Last</button></span><span class="text-body-secondary small">Showing {{ pagedRoles.length }} of {{ roles.length }} roles</span></div></div>
+  </div>
+  }
+</app-backoffice-page>

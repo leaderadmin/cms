@@ -1,0 +1,66 @@
+.file-manager { display: grid; grid-template-columns: 225px minmax(0, 1fr); gap: 18px; align-items: start; }
+.file-sidebar, .file-content { background: #fff; border: 1px solid #dfe3e8; border-radius: 6px; }
+.file-sidebar { padding: 14px 0 16px; }
+.upload-button, .folder-button { display: flex; align-items: center; justify-content: center; gap: 8px; width: calc(100% - 24px); margin: 0 12px 8px; min-height: 39px; border-radius: 4px; font-size: .88rem; cursor: pointer; }
+.upload-button { color: #fff; background: #087fce; }
+.folder-button { color: #5f6b76; background: #fff; border: 1px solid #aeb8c2; }
+.folder-button:disabled { opacity: .8; }
+.folder-nav { margin-top: 16px; }
+.folder-nav button { display: flex; align-items: center; gap: 10px; color: #53606d; background: transparent; border: 0; text-align: left; font-size: .88rem; }
+.folder-nav > button { width: 100%; padding: 9px 15px; }
+.folder-nav button i { width: 16px; color: #7b8792; }
+.folder-nav button span { flex: 1; }
+.folder-nav button strong { color: #7b8792; font-size: .72rem; font-weight: 500; }
+.folder-nav button.active { color: #fff; background: #087fce; }
+.folder-nav button.active i, .folder-nav button.active strong { color: #fff; }
+.folder-tree-row { display: flex; align-items: center; min-height: 39px; padding-right: 8px; }
+.folder-tree-row .folder-toggle { flex: 0 0 20px; justify-content: center; width: 20px; padding: 0; }
+.folder-tree-row .folder-toggle i { width: auto; font-size: .65rem; }
+.folder-tree-row .folder-item { flex: 1; min-width: 0; padding: 9px 0; }
+.folder-tree-row .folder-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.folder-tree-row .folder-delete { flex: 0 0 26px; justify-content: center; width: 26px; padding: 0; color: #a85d66; opacity: 0; }
+.folder-tree-row:hover .folder-delete, .folder-tree-row .folder-delete:focus { opacity: 1; }
+.folder-tree-row .folder-delete i { width: auto; font-size: .75rem; }
+.storage-meter { margin: 30px 15px 0; padding-top: 14px; border-top: 1px solid #e5e9ed; color: #77818b; font-size: .76rem; }
+.storage-title { display: flex; justify-content: space-between; margin-bottom: 8px; color: #596572; }
+.storage-title strong { font-size: .74rem; font-weight: 500; }
+.storage-meter .progress { height: 5px; margin-bottom: 6px; background: #e7edf2; }
+.storage-meter .progress-bar { background: #087fce; }
+.file-content { padding: 0 14px 14px; }
+.file-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 66px; border-bottom: 1px solid #e5e9ed; }
+.breadcrumb { display: flex; align-items: center; gap: 9px; color: #77818b; font-size: .88rem; white-space: nowrap; }
+.breadcrumb button { padding: 0; color: #087fce; background: none; border: 0; }
+.breadcrumb strong { color: #37434e; font-weight: 500; }
+.file-tools { display: flex; align-items: center; gap: 8px; }
+.search-box { width: 230px; }
+.search-box .input-group-text { color: #7c8791; background: #fff; border-right: 0; }
+.search-box .form-control { border-left: 0; font-size: .82rem; }
+.view-toggle { display: flex; border: 1px solid #cbd3da; border-radius: 4px; overflow: hidden; }
+.view-toggle button { width: 34px; height: 32px; color: #687581; background: #fff; border: 0; }
+.view-toggle button + button { border-left: 1px solid #cbd3da; }
+.view-toggle button.active { color: #fff; background: #65717b; }
+.upload-queue { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; padding: 9px 12px; color: #51606c; background: #eef7fc; border-radius: 4px; font-size: .82rem; }
+.upload-queue .btn { margin-left: auto; }
+.file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 14px; padding-top: 16px; }
+.file-tile { position: relative; min-width: 0; padding: 12px; border: 1px solid #dfe3e8; border-radius: 5px; background: #fff; box-shadow: 0 1px 2px rgb(33 37 41 / 4%); }
+.file-preview { display: flex; align-items: center; justify-content: center; width: 100%; height: 104px; margin-bottom: 10px; border: 0; border-radius: 4px; background: #f6f8fa; cursor: pointer; }
+.file-thumbnail { width: 100%; height: 100%; object-fit: contain; border-radius: 4px; }
+.file-icon { font-size: 3.1rem; }
+.file-icon.image { color: #146df5; }.file-icon.pdf { color: #df334d; }.file-icon.word { color: #1487c9; }.file-icon.sheet { color: #168c59; }.file-icon.archive { color: #6d7780; }.file-icon.text { color: #687680; }
+.file-tile-name { overflow: hidden; color: #303b45; font-size: .82rem; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.file-tile-meta { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; color: #84909a; font-size: .7rem; }
+.file-tile-meta span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-tile-actions { display: flex; justify-content: flex-end; gap: 3px; margin-top: 8px; }
+.file-tile-actions button { color: #71808d; background: none; border: 0; }
+.file-tile-actions button:hover { color: #087fce; }
+.list-card { margin-top: 16px; border: 1px solid #dfe3e8; border-radius: 5px; overflow: hidden; }
+.list-card th { color: #77818b; font-size: .74rem; font-weight: 600; text-transform: uppercase; }
+.list-card td { color: #52606c; font-size: .83rem; }
+.list-card .file-icon { font-size: 1.45rem; vertical-align: middle; }
+.empty-state { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 62px 20px 45px; color: #7b8791; }
+.empty-state i { color: #b6c0c8; font-size: 3rem; }
+.empty-state strong { color: #4b5863; }
+.empty-state span { font-size: .82rem; }
+.file-count { padding-top: 18px; color: #89939c; font-size: .76rem; }
+@media (max-width: 900px) { .file-manager { grid-template-columns: 1fr; } .file-sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; } .folder-nav, .storage-meter { grid-column: 1 / -1; } .storage-meter { margin-top: 16px; } }
+@media (max-width: 600px) { .file-toolbar { align-items: stretch; flex-direction: column; padding: 14px 0; } .file-tools { width: 100%; } .search-box { flex: 1; width: auto; } .file-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; } .file-sidebar { display: block; } }

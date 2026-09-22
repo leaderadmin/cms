@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en" ng-app="startupApp">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Startup Console</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+  <script src="app.module.js" defer></script>
+  <script src="modules/dashboard/dashboard.module.js" defer></script>
+  <script src="modules/dashboard/dashboard.service.js" defer></script>
+  <script src="modules/dashboard/dashboard.controller.js" defer></script>
+  <script src="modules/pages/pages.module.js" defer></script>
+  <script src="modules/pages/block-registry.service.js" defer></script>
+  <script src="modules/pages/page-editor.service.js" defer></script>
+  <script src="modules/pages/page-render.controller.js" defer></script>
+  <script src="modules/pages/editor-interactions.js" defer></script>
+  <script src="modules/pages/page-editor.controller.js" defer></script>
+</head>
+<body ng-include="'modules/pages/page-render.template.html'"></body>
+</html>

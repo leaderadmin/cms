@@ -1,0 +1,36 @@
+<app-backoffice-page eyebrow="CONTENT / ARTICLES / EDIT" [title]="title" description="Update article content, metadata and publication state." [loading]="loading" [error]="error" (retry)="goToList()">
+  <div page-actions class="page-actions">
+    <button class="btn btn-light" type="button" (click)="goToList()"><i class="bi bi-arrow-left"></i> Back to articles</button>
+  </div>
+
+  @if (!loading && can('article.update')) {
+    <section class="edit-panel">
+      <div class="editor-grid">
+        <label>Internal name<input class="form-control" [(ngModel)]="draft.name" name="article_name"></label>
+        <label>Type<select class="form-select" [(ngModel)]="draft.type" name="article_type"><option value="article">Article</option><option value="shareholder">Shareholder</option></select></label>
+        <label>Language<select class="form-select" [(ngModel)]="draft.translation.language_code" name="article_language"><option value="vi">Vietnamese</option><option value="en">English</option></select></label>
+        <label>Status<select class="form-select" [(ngModel)]="draft.status" name="article_status"><option [ngValue]="2">Pending</option><option [ngValue]="1">Active</option></select></label>
+        <label class="wide">Title<input class="form-control" [(ngModel)]="draft.translation.title" name="article_title" required></label>
+        <label>URL key<input class="form-control" [(ngModel)]="draft.translation.url_key" name="article_url_key" required></label>
+        <label>Category<app-article-category-select [categories]="categories" [(selectedIds)]="draft.category_ids"></app-article-category-select></label>
+        <label>Tags<app-article-tag-input [availableTags]="availableTags" [(tags)]="draft.tags" [(tagIds)]="draft.tag_ids"></app-article-tag-input></label>
+        <label class="wide">Thumbnail<app-article-image-picker [(imageId)]="draft.image_id"></app-article-image-picker></label>
+        <label class="wide">Short description<textarea class="form-control" rows="3" [(ngModel)]="draft.translation.short_description" name="article_summary"></textarea></label>
+        <label class="wide">Content HTML<app-article-html-editor [(content)]="draft.translation.content"></app-article-html-editor></label>
+        <details class="wide conversion-panel" open>
+          <summary><i class="bi bi-graph-up-arrow"></i><span><strong>SEO & conversion</strong><small>Help search engines find this article and turn readers into leads.</small></span></summary>
+          <div class="conversion-grid">
+            <label>SEO title<input class="form-control" [(ngModel)]="draft.translation.seo_title" name="article_seo_title" maxlength="255" placeholder="Leave empty to use article title"></label>
+            <label>Meta description<textarea class="form-control" rows="2" [(ngModel)]="draft.translation.meta_description" name="article_meta_description" maxlength="160" placeholder="Describe the benefit in 120-160 characters"></textarea></label>
+            <label>CTA button text<input class="form-control" [(ngModel)]="draft.cta.label" name="article_cta_label" placeholder="Get a consultation"></label>
+            <label>CTA URL<input class="form-control" [(ngModel)]="draft.cta.url" name="article_cta_url" placeholder="https://... or /contact"></label>
+            <label>CTA phone<input class="form-control" [(ngModel)]="draft.cta.phone" name="article_cta_phone" placeholder="0901 234 567"></label>
+          </div>
+        </details>
+      </div>
+      <div class="editor-actions"><button class="btn btn-primary" type="button" (click)="save()" [disabled]="saving || !draft.translation.title || !draft.translation.url_key"><i class="bi bi-check-lg"></i> {{ saving ? 'Saving...' : 'Save changes' }}</button></div>
+    </section>
+  } @else if (!loading) {
+    <p class="form-error">You do not have permission to edit articles.</p>
+  }
+</app-backoffice-page>

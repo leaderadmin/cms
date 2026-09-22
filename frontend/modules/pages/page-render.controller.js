@@ -1,4 +1,4 @@
-angular.module('startup.pages').controller('PageRenderController', ['PageEditorApi', 'BlockRegistry', function (PageEditorApi, BlockRegistry) {
+angular.module('startup.pages').controller('PageRenderController', ['PagePublicApi', 'BlockRegistry', function (PagePublicApi, BlockRegistry) {
   var renderer = this;
   renderer.page = { name: 'Loading page' };
   renderer.template = { regions: [] };
@@ -21,7 +21,7 @@ angular.module('startup.pages').controller('PageRenderController', ['PageEditorA
   renderer.load = function () {
     renderer.loading = true;
     renderer.error = '';
-    PageEditorApi.published(slugFromPath()).then(function (response) {
+    PagePublicApi.published(slugFromPath()).then(function (response) {
       renderer.page = response.data.page;
       renderer.template = response.data.template || { regions: [] };
       renderer.template.regions = (renderer.template.regions || []).map(normalizeRegion);

@@ -25,6 +25,19 @@ Open:
 - OpenAPI schema: http://localhost:8000/api/schema/
 - ReDoc: http://localhost:8000/api/redoc/
 
+### GitHub Pages preview
+
+The `main` branch deploys the Backoffice shell to GitHub Pages through
+`.github/workflows/deploy-backoffice-pages.yml`:
+
+```text
+https://leaderadmin.github.io/cms/
+```
+
+GitHub Pages only serves the Angular static bundle. Django API, PostgreSQL,
+Redis, authentication, and CRUD operations still require the Docker Compose
+environment or a separate backend deployment.
+
 The API uses PostgreSQL in Docker. PostgreSQL data is stored in the
 `postgres_data` Docker volume and is available at `postgres:5432` from the API
 container. Running Django directly without `DB_ENGINE=postgresql` keeps using

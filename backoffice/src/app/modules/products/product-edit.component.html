@@ -1,0 +1,80 @@
+<app-backoffice-page
+  eyebrow="CONTENT / PRODUCTS / EDIT"
+  [title]="title"
+  description="Update product information, classification and Vietnamese and English content."
+  [loading]="loading"
+  [error]="error"
+  (retry)="goToList()"
+>
+  <div page-actions class="page-actions">
+    <button class="btn btn-light" type="button" (click)="goToList()"><i class="bi bi-arrow-left"></i> Back to products</button>
+  </div>
+
+  @if (!loading) {
+    <section class="edit-panel">
+      <div class="editor-grid">
+        <label>Name<input class="form-control" [(ngModel)]="form.name" name="product_name"></label>
+        <label>Slug<input class="form-control" [(ngModel)]="form.slug" name="product_slug"></label>
+        <label>Group<select class="form-select" [(ngModel)]="form.kind" name="product_kind">@for (item of metadata.groups; track item.id) {<option [value]="item.slug">{{ item.name }}</option>}</select></label>
+        <label>Status<select class="form-select" [(ngModel)]="form.status" name="product_status"><option [ngValue]="0">Draft</option><option [ngValue]="1">Active</option><option [ngValue]="-1">Archived</option></select></label>
+        <label>Product type<select class="form-select" [(ngModel)]="form.product_type_id" name="product_type"><option [ngValue]="null">None</option>@for (item of metadata.types; track item.id) {<option [ngValue]="item.id">{{ item.name }}</option>}</select></label>
+        <label>Category<select class="form-select" [(ngModel)]="form.category_id" name="product_category"><option [ngValue]="null">None</option>@for (item of categoryOptions(); track item.id) {<option [ngValue]="item.id">{{ item.name }}</option>}</select></label>
+        <label>Attribute set<select class="form-select" [ngModel]="form.attribute_set_id" (ngModelChange)="setAttributeSet($event)" name="attribute_set"><option [ngValue]="null">None</option>@for (item of metadata.attribute_sets; track item.id) {<option [ngValue]="item.id">{{ item.name }}</option>}</select></label>
+        <label class="wide">Product tags<app-product-tag-input [tags]="form.tags" [availableTags]="metadata.product_tags" [tagIds]="form.tag_ids" (tagsChange)="form.tags = $event" (tagIdsChange)="form.tag_ids = $event"></app-product-tag-input><small class="form-text">Only tags created in Product tags can be selected.</small></label>
+        @if (form.attribute_set_id && attributeDefinitions().length) {
+          <div class="wide attribute-panel">
+            <div class="attribute-heading"><div><span class="eyebrow">PRODUCT ATTRIBUTES</span><h3>Additional product information</h3></div><small>Values are saved with this product.</small></div>
+            <div class="attribute-grid">
+              @for (attribute of attributeDefinitions(); track attribute.id) {
+                @if (attribute.value_type === 'boolean') {
+                  <label class="attribute-check"><input type="checkbox" [checked]="attributeValue(attribute.slug) === true" (change)="setAttributeValue(attribute.slug, $any($event.target).checked)"> {{ attribute.name }}</label>
+                } @else if (attribute.value_type === 'number') {
+                  <label>{{ attribute.name }}<input class="form-control" type="number" [value]="attributeValue(attribute.slug)" (input)="setAttributeValue(attribute.slug, $any($event.target).value)"></label>
+                } @else {
+                  <label>{{ attribute.name }}<textarea class="form-control" rows="3" [value]="attributeValue(attribute.slug)" (input)="setAttributeValue(attribute.slug, $any($event.target).value)"></textarea></label>
+                }
+              }
+            </div>
+          </div>
+        }
+        <div class="wide presentation-panel">
+          <div class="attribute-heading"><div><span class="eyebrow">PRESENTATION</span><h3>Product interface and template</h3></div><small>These settings control how this Product is rendered.</small></div>
+          <div class="attribute-grid">
+            <label>Template<select class="form-select" [ngModel]="presentationValue('template_key', 'product-detail')" (ngModelChange)="setPresentationValue('template_key', $event)" name="product_template"><option value="product-detail">Product detail</option><option value="product-landing">Product landing</option><option value="product-comparison">Product comparison</option></select></label>
+            <label>Display variant<select class="form-select" [ngModel]="presentationValue('display_variant', 'standard')" (ngModelChange)="setPresentationValue('display_variant', $event)" name="product_display_variant"><option value="standard">Standard</option><option value="featured">Featured</option><option value="compact">Compact</option></select></label>
+            <label class="attribute-check"><input type="checkbox" [checked]="presentationValue('show_attributes', true) === true" (change)="setPresentationValue('show_attributes', $any($event.target).checked)" name="product_show_attributes"> Show Product attributes</label>
+          </div>
+        </div>
+        <ul class="nav nav-tabs product-language-tabs wide" role="tablist" aria-label="Product languages">
+          <li class="nav-item" role="presentation"><button class="nav-link" [class.active]="activeLanguage === 'en'" type="button" role="tab" [attr.aria-selected]="activeLanguage === 'en'" (click)="switchLanguage('en')"><i class="bi bi-globe2 me-1"></i>English</button></li>
+          <li class="nav-item" role="presentation"><button class="nav-link" [class.active]="activeLanguage === 'vi'" type="button" role="tab" [attr.aria-selected]="activeLanguage === 'vi'" (click)="switchLanguage('vi')"><i class="bi bi-translate me-1"></i>Tiếng Việt</button></li>
+        </ul>
+        @if (activeLanguage === 'en') {
+          <div class="wide language-form" role="tabpanel" aria-label="English product form">
+            <div class="language-grid">
+              <label>Title (English)<input class="form-control" [(ngModel)]="form.translations[1].title" name="translation_en_title" required></label>
+              <label>URL key<input class="form-control" [(ngModel)]="form.translations[1].url_key" name="translation_en_url"></label>
+              <label>SEO title<input class="form-control" [(ngModel)]="form.translations[1].seo_title" name="translation_en_seo_title"></label>
+              <label class="wide editor-field">Short description<app-rich-editor [value]="form.translations[1].short_description" ariaLabel="English short description editor" (valueChange)="form.translations[1].short_description = $event"></app-rich-editor></label>
+              <label class="wide editor-field">Content<app-rich-editor [value]="form.translations[1].content" ariaLabel="English content editor" (valueChange)="form.translations[1].content = $event"></app-rich-editor></label>
+              <label class="wide">SEO description<textarea class="form-control" rows="3" [(ngModel)]="form.translations[1].meta_description" name="translation_en_seo"></textarea></label>
+            </div>
+          </div>
+        } @else {
+          <div class="wide language-form" role="tabpanel" aria-label="Vietnamese product form">
+            <div class="language-grid">
+              <label>Tiêu đề (Tiếng Việt)<input class="form-control" [(ngModel)]="form.translations[0].title" name="translation_vi_title" required></label>
+              <label>URL key<input class="form-control" [(ngModel)]="form.translations[0].url_key" name="translation_vi_url"></label>
+              <label>SEO title<input class="form-control" [(ngModel)]="form.translations[0].seo_title" name="translation_vi_seo_title"></label>
+              <label class="wide editor-field">Mô tả ngắn<app-rich-editor [value]="form.translations[0].short_description" ariaLabel="Vietnamese short description editor" (valueChange)="form.translations[0].short_description = $event"></app-rich-editor></label>
+              <label class="wide editor-field">Nội dung<app-rich-editor [value]="form.translations[0].content" ariaLabel="Vietnamese content editor" (valueChange)="form.translations[0].content = $event"></app-rich-editor></label>
+              <label class="wide">SEO description<textarea class="form-control" rows="3" [(ngModel)]="form.translations[0].meta_description" name="translation_vi_seo"></textarea></label>
+            </div>
+          </div>
+        }
+        <label class="check-line"><input type="checkbox" [(ngModel)]="form.is_featured" name="product_featured"> Featured product</label>
+      </div>
+      <div class="editor-actions"><button class="btn btn-primary" type="button" (click)="save()" [disabled]="saving || !form.name || !form.translations[0].title || !form.translations[1].title"><i class="bi bi-check-lg"></i> {{ saving ? 'Saving...' : editing ? 'Save changes' : 'Create product' }}</button></div>
+    </section>
+  }
+</app-backoffice-page>

@@ -1,0 +1,46 @@
+.toolbar { display: flex; gap: .65rem; margin: 0 0 1.25rem; max-width: 38rem; }
+.toolbar .form-control { min-height: 2.8rem; border-color: #d9e3e6; box-shadow: 0 3px 12px rgba(32, 68, 78, .04); }
+.toolbar .btn { min-width: 2.8rem; border-color: #cbd9dd; }
+.table-section, .editor { border: 1px solid #dce7e9; border-radius: 14px; background: #fff; box-shadow: 0 8px 24px rgba(32, 68, 78, .06); margin-bottom: 1rem; overflow: hidden; }
+.section-heading, .editor-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.25rem 1.4rem; }
+.section-heading { border-bottom: 1px solid #edf2f3; background: linear-gradient(180deg, #fff, #fbfdfd); }
+.section-heading h2, .editor-header h2 { margin: 0; color: #17343d; font-size: 1.12rem; letter-spacing: -.01em; }
+.section-heading p, .editor-header p { margin: .3rem 0 0; color: #708087; font-size: .86rem; }
+.count { min-width: 2.25rem; padding: .35rem .65rem; border: 1px solid #cde5e7; border-radius: 999px; background: #eff9f9; color: #087e82; text-align: center; font-size: .78rem; font-weight: 700; }
+.table-wrap { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.data-table th, .data-table td { padding: .9rem 1.4rem; border-bottom: 1px solid #edf0f2; text-align: left; vertical-align: middle; }
+.data-table th { color: #64737a; background: #f7fafb; font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+.data-table tbody tr { transition: background .15s ease; }
+.data-table tbody tr:hover { background: #f8fcfc; }
+.data-table tbody tr:last-child td { border-bottom: 0; }
+.primary-cell { color: #17343d; font-weight: 650; }
+.muted-cell { color: #6c757d; }
+.question-cell { min-width: 18rem; max-width: 28rem; }
+.actions-column { width: 7rem; }
+.actions { display: flex; align-items: center; gap: .25rem; min-width: 6rem; white-space: nowrap; }
+.status { display: inline-flex; align-items: center; gap: .35rem; border-radius: 999px; padding: .3rem .65rem; background: #f2f3f5; font-size: .75rem; font-weight: 600; }
+.status::before { width: .38rem; height: .38rem; border-radius: 50%; background: currentColor; content: ''; }
+.status.active { background: #dff4e8; color: #176b3a; }
+.icon-button { display: inline-grid; flex: 0 0 2rem; place-items: center; width: 2rem; height: 2rem; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #376575; padding: 0; }
+.icon-button:hover { border-color: #cde5e7; background: #eff9f9; }
+.icon-button.danger { color: #b64242; }
+.editor { padding: 1.4rem; overflow: visible; }
+.editor-header { padding: 0 0 1rem; }
+.eyebrow { color: #6c757d; font-size: .72rem; font-weight: 700; letter-spacing: .08em; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+.wide { grid-column: 1 / -1; }
+label { font-weight: 600; font-size: .82rem; }
+label input, label select, label textarea { display: block; margin-top: .4rem; font-weight: 400; border-color: #d6e2e5; }
+.editor-field > label { display: block; margin-bottom: .4rem; }
+.form-actions { display: flex; gap: .6rem; }
+.empty-state { color: #7a898f; text-align: center !important; padding: 3.5rem 1.2rem !important; background: #fcfefe; }
+.pagination-bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem 1.4rem; border-top: 1px solid #edf2f3; background: #fbfdfd; color: #718187; font-size: .78rem; }
+.pagination-controls { display: flex; align-items: center; gap: .5rem; }
+.pagination-controls label { display: flex; align-items: center; gap: .4rem; color: #718187; font-size: .75rem; font-weight: 600; }
+.pagination-controls select { width: auto; min-width: 4.2rem; border-color: #d6e2e5; }
+.page-button { display: inline-grid; place-items: center; width: 2rem; height: 2rem; border: 1px solid #d4e1e4; border-radius: 7px; background: #fff; color: #287a80; }
+.page-button:hover:not(:disabled) { border-color: #1b9da1; background: #effafa; }
+.page-button:disabled { cursor: not-allowed; opacity: .4; }
+.page-number { min-width: 3.8rem; color: #29464d; text-align: center; font-weight: 700; }
+@media (max-width: 800px) { .grid { grid-template-columns: 1fr; } .section-heading, .editor-header, .pagination-bar { align-items: flex-start; flex-direction: column; } .editor-header .btn { align-self: stretch; } .pagination-controls { width: 100%; justify-content: space-between; } }

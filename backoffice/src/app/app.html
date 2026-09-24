@@ -48,6 +48,8 @@
       <app-settings [initialSection]="'mail'"></app-settings>
     } @else if (view === 'activity') {
       <app-activity-log></app-activity-log>
+    } @else if (view === 'sessions') {
+      <app-session-management></app-session-management>
     } @else if (view === 'roles') {
       <app-role-management></app-role-management>
     } @else if (view === 'entities') {
@@ -60,10 +62,32 @@
       <app-article-edit></app-article-edit>
     } @else if (view === 'articles') {
       <app-article-management></app-article-management>
+    } @else if (isProductEditView()) {
+      <app-product-edit></app-product-edit>
+    } @else if (isProductMetadataFormView()) {
+      <app-product-metadata-form></app-product-metadata-form>
+    } @else if (view === 'product-sets') {
+      <app-product-type-management></app-product-type-management>
+    } @else if (view === 'attribute-sets') {
+      <app-attribute-set-management></app-attribute-set-management>
+    } @else if (view === 'product-tags') {
+      <app-product-tag-management></app-product-tag-management>
+    } @else if (view === 'products') {
+      <app-product-management></app-product-management>
     } @else if (view === 'categories') {
       <app-category-management></app-category-management>
     } @else if (view === 'tags') {
       <app-tag-management></app-tag-management>
+    } @else if (view === 'recruitment') {
+      <app-recruitment-management></app-recruitment-management>
+    } @else if (view === 'faq-categories') {
+      <app-faq-management mode="categories"></app-faq-management>
+    } @else if (view === 'faq-questions' || view === 'faq') {
+      <app-faq-management mode="questions"></app-faq-management>
+    } @else if (view === 'dealers') {
+      <app-dealer-management></app-dealer-management>
+    } @else if (view === 'admin-regions' || view === 'admin-areas') {
+      <app-recruitment-location-management [isArea]="view === 'admin-areas'"></app-recruitment-location-management>
     } @else if (view === 'pages') {
       <app-page-list></app-page-list>
     } @else if (view === 'pages/new') {
@@ -72,8 +96,14 @@
       <app-page-builder [pageId]="pageIdFromView()"></app-page-builder>
     } @else if (view === 'blocks') {
       <app-block-management></app-block-management>
-    } @else if (view === 'components') {
+    } @else if (isBlockCreateView()) {
+      <app-block-management [createMode]="true"></app-block-management>
+    } @else if (isBlockEditView()) {
+      <app-block-management [blockId]="blockIdFromView()"></app-block-management>
+    } @else if (isComponentsView()) {
       <app-component-management></app-component-management>
+    } @else if (view === 'forms') {
+      <app-form-management></app-form-management>
     } @else {
     <app-backoffice-page
       eyebrow="ANGULAR / BACKOFFICE / OPERATIONS"
@@ -101,13 +131,46 @@
       <mat-card class="metric-card" appearance="outlined">
         <span class="metric-label">API visits</span>
         <strong class="metric-value">{{ stats.visits || 0 }}</strong>
-        <span class="metric-note">Stored in Redis</span>
+        <span class="metric-note">All-time requests tracked in Redis</span>
+      </mat-card>
+      <mat-card class="metric-card" appearance="outlined">
+        <span class="metric-label">Active users</span>
+        <strong class="metric-value">{{ stats.content_counts?.['users'] || 0 }}</strong>
+        <span class="metric-note">Enabled admin accounts</span>
+      </mat-card>
+      <mat-card class="metric-card" appearance="outlined">
+        <span class="metric-label">Published content</span>
+        <strong class="metric-value">{{ (stats.content_counts?.['articles'] || 0) + (stats.content_counts?.['pages'] || 0) }}</strong>
+        <span class="metric-note">Articles and build page records</span>
       </mat-card>
       <mat-card class="metric-card accent" appearance="outlined">
         <span class="metric-label">Last cron run</span>
         <strong class="metric-value small">{{ stats.last_cron_run?.ran_at || 'Waiting for job' }}</strong>
         <span class="metric-note">Managed by cron_service</span>
       </mat-card>
+      </section>
+
+      <section class="charts-grid" aria-label="System charts">
+        <mat-card class="chart-panel wide" appearance="outlined">
+          <div class="panel-heading"><span class="metric-label">System activity</span><span class="panel-mark">LAST 7 DAYS</span></div>
+          <div class="bar-chart">
+            @for (day of stats.activity_by_day || []; track day.date) {
+              <div class="bar-column">
+                <span class="bar-value">{{ day.count }}</span>
+                <div class="bar-track"><span class="bar-fill" [style.height.%]="chartHeight(day.count, activityValues())"></span></div>
+                <span class="bar-label">{{ shortDate(day.date) }}</span>
+              </div>
+            }
+          </div>
+        </mat-card>
+        <mat-card class="chart-panel" appearance="outlined">
+          <div class="panel-heading"><span class="metric-label">Content mix</span><span class="panel-mark">{{ contentTotal() }} ITEMS</span></div>
+          <div class="content-mix">
+            @for (item of [{ key: 'articles', label: 'Articles' }, { key: 'pages', label: 'Pages' }, { key: 'products', label: 'Products' }, { key: 'recruitment_jobs', label: 'Jobs' }, { key: 'faqs', label: 'FAQs' }]; track item.key) {
+              <div class="mix-row"><span>{{ item.label }}</span><strong>{{ stats.content_counts?.[item.key] || 0 }}</strong><span class="mix-track"><i [style.width.%]="contentWidth(stats.content_counts?.[item.key] || 0)"></i></span></div>
+            }
+          </div>
+        </mat-card>
       </section>
 
       <section class="details-grid">

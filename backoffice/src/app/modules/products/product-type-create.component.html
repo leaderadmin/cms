@@ -1,0 +1,19 @@
+<app-backoffice-page
+  eyebrow="CONTENT / PRODUCTS / SETS / NEW"
+  title="New product set"
+  description="Create a product set that can be assigned to products."
+  [error]="error"
+>
+  <div page-actions class="page-actions">
+    <button class="btn btn-light" type="button" (click)="goToList()"><i class="bi bi-arrow-left"></i> Back to product sets</button>
+  </div>
+
+  <section class="create-panel">
+    <div class="panel-heading"><span class="eyebrow">PRODUCT SET DETAILS</span><h2>Create a product set</h2></div>
+    <div class="form-grid">
+      <label>Name<input class="form-control" [(ngModel)]="name" name="product_set_name" placeholder="Cards, Loans, Savings" required></label>
+      <label>Slug<input class="form-control" [(ngModel)]="slug" name="product_set_slug" placeholder="cards"></label>
+    </div>
+    <div class="editor-actions"><button class="btn btn-primary" type="button" (click)="save()" [disabled]="saving || !name.trim()"><i class="bi bi-check-lg"></i> {{ saving ? 'Creating...' : 'Create product set' }}</button></div>
+  </section>
+</app-backoffice-page>

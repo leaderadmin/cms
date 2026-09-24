@@ -1,13 +1,18 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Menu, MenuItem, MenuItemPayload, MenuPayload } from './menu.models';
+import { Menu, MenuItem, MenuItemPayload, MenuPayload, RoutePermission } from './menu.models';
 
 @Injectable({ providedIn: 'root' })
 export class MenuService {
   private readonly http = inject(HttpClient);
   private readonly endpoint = '/api/auth/menu/';
   private readonly menusEndpoint = '/api/auth/menus/';
+  private readonly permissionsEndpoint = '/api/auth/permissions/';
+
+  listPermissions(): Observable<RoutePermission[]> {
+    return this.http.get<RoutePermission[]>(this.permissionsEndpoint);
+  }
 
   listMenus(): Observable<Menu[]> {
     return this.http.get<Menu[]>(this.menusEndpoint);

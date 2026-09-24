@@ -1,0 +1,10 @@
+<app-backoffice-page [eyebrow]="isArea ? 'ADMINISTRATION / AREAS' : 'ADMINISTRATION / REGIONS'" [title]="isArea ? 'Khu vực' : 'Miền'" [description]="isArea ? 'Manage areas under each region.' : 'Manage recruitment regions.'" [loading]="loading" [error]="error" (retry)="load()">
+  <div page-actions><button class="btn btn-primary" type="button" (click)="openCreate()"><i class="bi bi-plus-lg me-1"></i>New {{ isArea ? 'area' : 'region' }}</button></div>
+  @if (editorOpen) {
+    <section class="editor"><div class="editor-heading"><h2>{{ editingId ? 'Edit' : 'New' }} {{ isArea ? 'area' : 'region' }}</h2><button class="btn-close" type="button" (click)="editorOpen = false"></button></div>
+      <div class="grid"><label>Name<input class="form-control" [(ngModel)]="name"></label>@if (isArea) { <label>Region<select class="form-select" [(ngModel)]="regionId"><option [ngValue]="null">Select region</option>@for (region of regions; track region.id) { <option [ngValue]="region.id">{{ region.name }}</option> }</select></label> }</div>
+      <button class="btn btn-primary" [disabled]="saving || !name.trim() || (isArea && !regionId)" (click)="save()">{{ saving ? 'Saving...' : 'Save' }}</button>
+    </section>
+  }
+  <div class="table-responsive"><table class="table table-hover align-middle"><thead><tr><th>Name</th>@if (isArea) { <th>Region</th> }<th>Status</th><th></th></tr></thead><tbody>@for (item of items; track item.id) {<tr><td><strong>{{ item.name }}</strong><small>{{ item.slug }}</small></td>@if (isArea) { <td>{{ regionName(item.region_id) }}</td> }<td><span class="status" [class.active]="item.status === 1">{{ item.status === 1 ? 'Active' : 'Inactive' }}</span></td><td class="text-end text-nowrap"><button class="icon-button" title="Edit" (click)="edit(item)"><i class="bi bi-pencil"></i></button><button class="icon-button danger" title="Delete" (click)="remove(item)"><i class="bi bi-trash"></i></button></td></tr>} @empty {<tr><td [attr.colspan]="isArea ? 4 : 3" class="empty-state">No {{ isArea ? 'areas' : 'regions' }} found.</td></tr>}</tbody></table></div>
+</app-backoffice-page>

@@ -29,8 +29,12 @@ def sync_declared_permissions(**kwargs):
         DECLARED_PERMISSIONS as ARTICLE_PERMISSIONS,
     )
     from .modules.pages.permissions import DECLARED_PERMISSIONS as PAGE_PERMISSIONS
+    from .modules.products.permissions import DECLARED_PERMISSIONS as PRODUCT_PERMISSIONS
+    from .modules.recruitment.permissions import DECLARED_PERMISSIONS as RECRUITMENT_PERMISSIONS
+    from .modules.faq.permissions import DECLARED_PERMISSIONS as FAQ_PERMISSIONS
+    from .modules.dealers.permissions import DECLARED_PERMISSIONS as DEALER_PERMISSIONS
 
-    declarations = (*AUTH_PERMISSIONS, *DASHBOARD_PERMISSIONS, *AUDIT_PERMISSIONS, *ENTITY_PERMISSIONS, *MEDIA_PERMISSIONS, *ARTICLE_PERMISSIONS, *PAGE_PERMISSIONS)
+    declarations = (*AUTH_PERMISSIONS, *DASHBOARD_PERMISSIONS, *AUDIT_PERMISSIONS, *ENTITY_PERMISSIONS, *MEDIA_PERMISSIONS, *ARTICLE_PERMISSIONS, *PAGE_PERMISSIONS, *PRODUCT_PERMISSIONS, *RECRUITMENT_PERMISSIONS, *FAQ_PERMISSIONS, *DEALER_PERMISSIONS)
     declared_codes = {declaration["code"] for declaration in declarations}
     RoutePermission.objects.exclude(code__in=declared_codes).delete()
     for declaration in declarations:

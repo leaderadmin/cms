@@ -40,7 +40,13 @@ def health(request):
 @permission_classes([HasRoutePermission])
 def stats(request):
     data = _dashboard_service.get_stats()
-    return JsonResponse(serialize_stats(data["visits"], data["last_job"]))
+    return JsonResponse(serialize_stats(
+        data["visits"],
+        data["last_job"],
+        data["visits_by_day"],
+        data["activity_by_day"],
+        data["content_counts"],
+    ))
 
 
 stats.required_permission = DASHBOARD_STATS

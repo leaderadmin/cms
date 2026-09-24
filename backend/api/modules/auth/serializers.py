@@ -252,6 +252,9 @@ class MenuItemSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         parent = attrs.get("parent", getattr(self.instance, "parent", None))
         menu = attrs.get("menu", getattr(self.instance, "menu", None))
+        required_permission = str(attrs.get("required_permission", getattr(self.instance, "required_permission", ""))).strip()
+        if required_permission and not RoutePermission.objects.filter(code=required_permission).exists():
+            raise serializers.ValidationError({"required_permission": "Permission does not exist."})
         if parent and parent.menu_id != menu.id:
             raise serializers.ValidationError({"parent_id": "A menu item must have a parent in the same menu."})
         if self.instance and (parent == self.instance or self.instance in self._descendants(parent)):

@@ -1,0 +1,50 @@
+<app-backoffice-page
+  eyebrow="CONTENT / PRODUCTS / CATALOG STRUCTURE"
+  title="Product catalog structure"
+  description="Choose a product type to view and manage the groups that belong to it."
+  [loading]="loading"
+  [error]="error"
+  (retry)="load()"
+>
+  <div page-actions class="page-actions">
+    <button class="btn btn-light" type="button" (click)="goToProducts()"><i class="bi bi-arrow-left"></i> Back to products</button>
+    <button class="btn btn-light" type="button" (click)="goToCreate()"><i class="bi bi-plus-lg"></i> New product type</button>
+  </div>
+
+  <section class="metadata-table data-panel type-tree-panel">
+    <div class="section-topline"><div><span class="panel-kicker">PRODUCT CATALOG HIERARCHY</span><h2>Product types</h2></div><span class="count-pill">{{ metadata.types.length }} types</span></div>
+    <p class="section-help">Each product type is a top-level family. Click a type to expand its product groups.</p>
+    <div class="type-tree">
+      @for (item of metadata.types; track item.id) {
+        <article class="type-node" [class.expanded]="isExpanded(item.id)">
+          <div class="type-row">
+            <button class="expand-button" type="button" (click)="toggleType(item.id)" [attr.aria-expanded]="isExpanded(item.id)" [attr.aria-label]="isExpanded(item.id) ? 'Collapse ' + item.name : 'Expand ' + item.name"><i class="bi" [class.bi-chevron-down]="isExpanded(item.id)" [class.bi-chevron-right]="!isExpanded(item.id)"></i></button>
+            <div class="type-identity"><span class="level-label type-label">TYPE</span><strong>{{ item.name }}</strong><code>{{ item.slug }}</code></div>
+            <span class="status-badge active">Active</span><span class="child-count">{{ item.groups.length }} groups</span>
+            <button class="icon-button type-edit-action" type="button" (click)="edit('product-sets', item.id)" title="Edit product type" aria-label="Edit product type"><i class="bi bi-pencil-square"></i></button>
+          </div>
+          @if (isExpanded(item.id)) {
+            <div class="group-tree">
+              <div class="group-tree-heading"><span>Groups in {{ item.name }}</span><button class="tree-action-button group-create-action" type="button" (click)="goToGroupCreate(item.id)" title="Add group" aria-label="Add group"><i class="bi bi-folder-plus"></i></button></div>
+              @for (group of item.groups; track group.id) {
+                <div class="group-item">
+                  <div class="group-row"><i class="bi bi-folder2 group-level-icon"></i><div class="group-identity"><span class="level-label group-label">GROUP</span><strong>{{ group.name }}</strong><code>{{ group.slug }}</code></div><span class="status-badge active">Active</span><div class="row-actions"><button class="tree-action-button product-create-action" type="button" (click)="goToProductCreate(group.slug)" title="Add product to this group" aria-label="Add product to this group"><i class="bi bi-plus-square"></i></button><button class="icon-button group-edit-action" type="button" (click)="edit('product-groups', group.id)" title="Edit group" aria-label="Edit group"><i class="bi bi-pencil"></i></button></div></div>
+                  <div class="product-tree">
+                    @for (product of group.products; track product.id) {
+                      <div class="product-row"><i class="bi bi-box-seam product-level-icon"></i><div class="product-identity"><span class="level-label product-label">PRODUCT</span><strong>{{ product.title }}</strong><code>{{ product.slug }}</code>@if (product.tags.length) {<div class="product-tags">@for (tag of product.tags; track tag) {<span>{{ tag }}</span>}</div>}</div><span class="status-badge" [class.active]="product.status === 1" [class.pending]="product.status === 0">{{ product.status_label }}</span><div class="row-actions"><button class="icon-button product-edit-action" type="button" (click)="edit('products', product.id)" title="Edit product" aria-label="Edit product"><i class="bi bi-pencil"></i></button></div></div>
+                    } @empty {
+                      <div class="product-empty"><i class="bi bi-box-seam"></i><span>No products in this group yet.</span></div>
+                    }
+                  </div>
+                </div>
+              } @empty {
+                <div class="empty-callout"><i class="bi bi-folder2-open"></i><strong>No groups in {{ item.name }} yet</strong><span>Use Add group above to assign the first group to this product type.</span></div>
+              }
+            </div>
+          }
+        </article>
+      } @empty { <div class="empty-callout"><i class="bi bi-diagram-3"></i><strong>No product types yet</strong><span>Create a product type before adding groups.</span></div> }
+    </div>
+  </section>
+
+</app-backoffice-page>

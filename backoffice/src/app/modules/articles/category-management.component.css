@@ -17,7 +17,5 @@
 .status-badge { background: #fff4e5; border-radius: 999px; color: #9a6700; display: inline-block; font-size: .75rem; font-weight: 700; padding: .2rem .55rem; text-transform: uppercase; }
 .status-badge.active { background: #e8f7ee; color: #18794e; }
 .empty-state { color: #667085; padding: 2rem; text-align: center; }
-.icon-button { background: transparent; border: 0; color: #475467; padding: .35rem; }
-.icon-button:hover { color: #111827; }
-.icon-button.danger:hover { color: #b42318; }
+.icon-button { background: transparent; border: 0; padding: .35rem; }
 @media (max-width: 760px) { .category-toolbar, .editor-grid { grid-template-columns: 1fr; } .editor-grid .wide { grid-column: auto; } }

@@ -1,2 +1,45 @@
 html, body { min-height: 100%; }
 body { margin: 0; }
+
+:root {
+	--icon-primary: #0c7f89;
+	--icon-secondary: #25727a;
+	--icon-success: #198754;
+	--icon-warning: #d97706;
+	--icon-danger: #c65346;
+	--icon-neutral: #68787c;
+}
+
+.icon-button,
+.icon-action {
+	color: var(--icon-primary);
+	transition: color .15s ease, background-color .15s ease, transform .15s ease;
+}
+
+.icon-button:hover,
+.icon-action:hover { color: var(--icon-secondary); }
+
+.icon-button.danger,
+.icon-action.danger { color: var(--icon-danger); }
+
+.icon-button.danger:hover,
+.icon-action.danger:hover { color: #a63d32; }
+
+.icon-button.success,
+.icon-action.success { color: var(--icon-success); }
+.icon-button.warning,
+.icon-action.warning { color: var(--icon-warning); }
+.icon-button.neutral,
+.icon-action.neutral { color: var(--icon-neutral); }
+
+.icon-button:active,
+.icon-action:active { transform: translateY(1px); }
+
+.btn-close:not(.btn-close-white) {
+	opacity: 1;
+	padding: .45rem;
+	border-radius: 50%;
+	background-color: #e8f2f0;
+}
+
+.btn-close:not(.btn-close-white):hover { background-color: #d6ebe7; }

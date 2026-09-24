@@ -1,0 +1,12 @@
+export interface ProductTranslation { id?: number; language_code: string; title: string; short_description: string; content: string; url_key: string; seo_title: string; meta_keyword: string; meta_description: string; }
+export interface ProductType { id: number; name: string; slug: string; status: number; ordering: number; groups: ProductGroup[]; }
+export interface ProductItem { id: number; name: string; slug: string; title: string; status: number; status_label: string; tags: string[]; }
+export interface ProductGroup { id: number; name: string; slug: string; status: number; ordering: number; product_type_id: number | null; products: ProductItem[]; }
+export interface ProductAttribute { id: number; name: string; slug: string; value_type: string; status: number; ordering: number; }
+export interface ProductTag { id: number; name: string; slug: string; usage_count: number; }
+export interface ProductAttributeSet { id: number; name: string; slug: string; status: number; ordering: number; attribute_ids: number[]; attributes: ProductAttribute[]; }
+export interface ProductCategory { id: number; name: string; slug: string; parent_id: number | null; product_type_id: number | null; status: number; ordering: number; }
+export interface Product { id: number; name: string; slug: string; kind: string; status: number; status_label: string; ordering: number; is_featured: boolean; tags: string[]; tag_ids: number[]; product_type: ProductType | null; category: ProductCategory | null; attribute_set?: { id: number; name: string; slug: string; attribute_ids: number[] } | null; attributes: Record<string, unknown>; extra_data: Record<string, unknown>; translation: ProductTranslation | null; translations: ProductTranslation[]; }
+export interface ProductInput { name: string; slug: string; kind: string; status: number; ordering: number; is_featured: boolean; tags: string[]; tag_ids: number[]; product_type_id: number | null; category_id: number | null; attribute_set_id: number | null; attributes: Record<string, unknown>; extra_data: Record<string, unknown>; translation: ProductTranslation; translations: ProductTranslation[]; }
+export interface ProductPage { count: number; page: number; page_size: number; results: Product[]; }
+export interface ProductMetadata { groups: ProductGroup[]; types: ProductType[]; categories: ProductCategory[]; attributes: ProductAttribute[]; attribute_sets: ProductAttributeSet[]; product_tags: ProductTag[]; }

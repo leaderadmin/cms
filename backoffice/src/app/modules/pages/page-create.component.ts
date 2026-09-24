@@ -1,14 +1,14 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BackofficePageComponent, ToastService } from '../../shared/ui';
-import { PageService } from './page.service';
-import { PageInput, PageTemplate } from './page.models';
+import { BackofficePageComponent, RichEditorComponent, ToastService } from '../../shared/ui';
+import { ContentArticle, ContentCategory, PageService } from './page.service';
+import { PageContentMode, PageInput, PageTemplate } from './page.models';
 
 @Component({
   selector: 'app-page-create',
-  imports: [FormsModule, BackofficePageComponent],
+  imports: [FormsModule, BackofficePageComponent, RichEditorComponent],
   templateUrl: './page-create.component.html',
-  styleUrl: './page-create.component.css',
+  styleUrls: ['./page-create.component.css', './page-create-overrides.css'],
 })
 export class PageCreateComponent {
   private readonly pagesApi = inject(PageService);
@@ -17,7 +17,9 @@ export class PageCreateComponent {
   protected loading = true;
   protected saving = false;
   protected error = '';
-  protected form: PageInput = { name: '', slug: '', template_key: '', status: 'draft', components: [] };
+  protected form: PageInput = { name: '', slug: '', short_code: '', template_key: '', status: 'draft', components: [], article_ids: [], content_config: { mode: 'articles', article_ids: [], html: '', css: '', js: '' } };
+  protected articles: ContentArticle[] = [];
+  protected categories: ContentCategory[] = [];
   protected step = 1;
 
   protected get selectedTemplateName(): string {
@@ -26,7 +28,7 @@ export class PageCreateComponent {
 
   constructor() {
     this.pagesApi.templates().subscribe({
-      next: (templates) => { this.templates = templates; this.form.template_key = templates[0]?.key || ''; this.loading = false; },
+      next: (templates) => { this.templates = templates; this.form.template_key = templates[0]?.key || ''; this.pagesApi.articles().subscribe({ next: (response) => { this.articles = response.results; this.pagesApi.categories().subscribe({ next: (categories) => { this.categories = categories; this.loading = false; }, error: () => { this.loading = false; } }); }, error: () => { this.loading = false; } }); },
       error: (response) => { this.error = response.error?.detail || 'Unable to load templates.'; this.loading = false; },
     });
   }
@@ -45,6 +47,11 @@ export class PageCreateComponent {
     this.step = Math.min(3, this.step + 1);
   }
   protected back(): void { this.error = ''; this.step = Math.max(1, this.step - 1); }
+  protected articleSelected(articleId: number): boolean { return this.form.article_ids.includes(articleId); }
+  protected toggleArticle(articleId: number, checked: boolean): void { this.form.article_ids = checked ? [...new Set([...this.form.article_ids, articleId])] : this.form.article_ids.filter((id) => id !== articleId); this.form.content_config = { ...this.form.content_config, article_ids: this.form.article_ids }; }
+  protected contentMode(): PageContentMode { return this.form.content_config.mode; }
+  protected setContentMode(mode: PageContentMode): void { this.form.content_config = { ...this.form.content_config, mode, article_ids: this.form.article_ids }; }
+  protected setContentCategory(categoryId: string): void { this.form.content_config = { ...this.form.content_config, category_id: Number(categoryId) }; }
   protected save(): void {
     if (!this.form.name.trim() || !this.form.slug.trim() || !this.form.template_key) { this.error = 'Vui lòng nhập tên, slug và chọn template.'; return; }
     this.saving = true;

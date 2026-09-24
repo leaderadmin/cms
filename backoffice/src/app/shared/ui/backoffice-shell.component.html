@@ -20,7 +20,7 @@
       @for (item of navigation; track item.href) {
         @if (hasChildren(item)) {
           <li class="nav-item" [class.menu-open]="isGroupExpanded(item)">
-            <button class="nav-link nav-group-toggle" type="button" [class.active]="item.active" [attr.aria-expanded]="isGroupExpanded(item)" (click)="toggleGroup(item)">
+            <button class="nav-link nav-group-toggle" type="button" [class.active]="item.active" [attr.aria-expanded]="isGroupExpanded(item)" (click)="item.view ? selectNavigation(item) : toggleGroup(item)">
               <i class="nav-icon" [class]="item.icon ? 'nav-icon bi ' + item.icon : 'nav-icon bi bi-folder'"></i><p>{{ navigationLabel(item) }}<i class="nav-arrow bi" [class.bi-chevron-right]="!isGroupExpanded(item)" [class.bi-chevron-down]="isGroupExpanded(item)"></i></p>
             </button>
             @if (isGroupExpanded(item)) {

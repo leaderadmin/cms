@@ -1,0 +1,17 @@
+.page-actions { display: flex; justify-content: flex-end; }
+.session-list { display: grid; gap: .75rem; margin-top: 1.5rem; }
+.session-row { align-items: center; background: #fff; border: 1px solid #dee2e6; border-radius: .25rem; display: flex; gap: 1rem; padding: 1rem 1.1rem; }
+.session-row.revoked { opacity: .68; }
+.session-icon { align-items: center; background: #e8f1ff; border-radius: 50%; color: #0d6efd; display: flex; flex: 0 0 2.6rem; height: 2.6rem; justify-content: center; }
+.session-details { flex: 1; min-width: 0; }
+.session-title { align-items: center; display: flex; flex-wrap: wrap; gap: .6rem; }
+.session-title strong { overflow-wrap: anywhere; }
+.status-badge { border-radius: 999px; font-size: .7rem; font-weight: 700; padding: .2rem .55rem; text-transform: uppercase; }
+.status-badge.active { background: #d1e7dd; color: #146c43; }
+.status-badge.revoked { background: #e9ecef; color: #6c757d; }
+.session-meta { color: #6c757d; display: flex; flex-wrap: wrap; font-size: .78rem; gap: .9rem; margin-top: .45rem; }
+.session-meta i { margin-right: .3rem; }
+.revoked-time { color: #6c757d; display: block; margin-top: .35rem; }
+.empty-state { align-items: center; background: #fff; border: 1px dashed #adb5bd; color: #6c757d; display: flex; flex-direction: column; gap: .35rem; padding: 3rem 1rem; text-align: center; }
+.empty-state i { color: #198754; font-size: 2rem; }
+@media (max-width: 760px) { .session-row { align-items: flex-start; flex-wrap: wrap; } .session-row > .btn { margin-left: 3.6rem; } }

@@ -30,6 +30,13 @@ export interface MenuItemPayload {
   is_active: boolean;
 }
 
+export interface RoutePermission {
+  id: number;
+  code: string;
+  module: string;
+  route: string;
+}
+
 export interface MenuPayload {
   name: string;
   slug: string;

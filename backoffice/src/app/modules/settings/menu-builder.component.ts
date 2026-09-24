@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { ToastService } from '../../shared/ui';
-import { Menu, MenuItem, MenuItemPayload, MenuPayload } from './menu.models';
+import { Menu, MenuItem, MenuItemPayload, MenuPayload, RoutePermission } from './menu.models';
 import { MenuService } from './menu.service';
 
 @Component({
@@ -30,9 +30,16 @@ export class MenuBuilderComponent {
   protected form: MenuItemPayload = this.emptyForm();
   protected editingId: number | null = null;
   protected itemEditorOpen = false;
+  protected permissions: RoutePermission[] = [];
+  protected permissionSearch = '';
+  protected permissionDropdownOpen = false;
 
   constructor() {
     this.loadMenus();
+    this.menuApi.listPermissions().subscribe({
+      next: (permissions) => { this.permissions = permissions; },
+      error: () => { this.error = 'Unable to load permissions'; },
+    });
   }
 
   protected get roots(): MenuItem[] {
@@ -81,12 +88,16 @@ export class MenuBuilderComponent {
   protected openCreateItem(): void {
     this.editingId = null;
     this.form = this.emptyForm();
+    this.permissionSearch = '';
+    this.permissionDropdownOpen = false;
     this.itemEditorOpen = true;
   }
 
   protected edit(item: MenuItem): void {
     this.editingId = item.id;
     this.form = { ...item };
+    this.permissionSearch = '';
+    this.permissionDropdownOpen = false;
     this.itemEditorOpen = true;
   }
 
@@ -94,6 +105,33 @@ export class MenuBuilderComponent {
     this.editingId = null;
     this.form = this.emptyForm();
     this.itemEditorOpen = false;
+    this.permissionSearch = '';
+    this.permissionDropdownOpen = false;
+  }
+
+  protected get filteredPermissions(): RoutePermission[] {
+    const query = this.permissionSearch.trim().toLowerCase();
+    if (!query) return this.permissions;
+    return this.permissions.filter((permission) => `${this.permissionLabel(permission)} ${permission.code} ${permission.module} ${permission.route}`.toLowerCase().includes(query));
+  }
+
+  protected permissionLabel(permission: RoutePermission): string {
+    const actions: Record<string, string> = { read: 'Xem', create: 'Tạo', update: 'Cập nhật', delete: 'Xóa', publish: 'Xuất bản', upload: 'Tải lên', revoke: 'Thu hồi', assign_role: 'Gán vai trò', stats: 'Xem thống kê' };
+    const resources: Record<string, string> = { 'auth.me': 'hồ sơ cá nhân', 'auth.users': 'người dùng', 'auth.roles': 'vai trò', 'auth.permissions': 'quyền truy cập', 'auth.sessions': 'phiên đăng nhập', 'auth.menu': 'menu', dashboard: 'bảng điều khiển', 'audit.logs': 'nhật ký hoạt động', entity: 'đơn vị', article: 'bài viết', 'article.category': 'danh mục bài viết', 'article.tag': 'thẻ bài viết', media: 'thư viện media', page: 'trang', 'page.component': 'component trang', 'page.form': 'form động', product: 'sản phẩm', 'product.metadata': 'thuộc tính sản phẩm', 'product.tag': 'thẻ sản phẩm', recruitment: 'tuyển dụng', 'recruitment.department': 'phòng ban tuyển dụng', faq: 'FAQ', dealer: 'đại lý' };
+    const parts = permission.code.split('.');
+    return `${actions[parts.at(-1) || ''] || 'Quản lý'} ${resources[parts.slice(0, -1).join('.')] || parts.slice(0, -1).join(' ')}`;
+  }
+
+  protected selectPermission(permission: RoutePermission): void {
+    this.form.required_permission = permission.code;
+    this.form.href = this.permissionHref(permission);
+    this.permissionSearch = this.permissionLabel(permission);
+    this.permissionDropdownOpen = false;
+  }
+
+  protected permissionHref(permission: RoutePermission): string {
+    const routes: Record<string, string> = { 'dashboard.stats': '#overview', 'auth.me': '#profile', 'auth.users': '#users', 'auth.roles': '#roles', 'auth.permissions': '#roles', 'auth.sessions': '#sessions', 'auth.menu': '#menu-builder', 'audit.logs': '#activity', entity: '#entities', article: '#articles', 'article.category': '#categories', 'article.tag': '#tags', media: '#media', page: '#pages', 'page.component': '#components', 'page.form': '#forms', product: '#products', 'product.metadata': '#products', 'product.tag': '#product-tags', recruitment: '#recruitment', 'recruitment.department': '#recruitment-departments', faq: '#faq', dealer: '#dealers' };
+    return routes[permission.code.split('.').slice(0, -1).join('.')] || '';
   }
 
   protected save(): void {

@@ -129,7 +129,7 @@
                   <h2 class="modal-title">{{ editingId ? 'Edit menu item' : 'Add item to ' + selectedMenu?.name }}</h2>
                   <button type="button" class="btn-close" aria-label="Close" (click)="cancelEdit()"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body menu-item-form-body">
               <label class="form-label">
                 Label
                 <input class="form-control" name="label" [(ngModel)]="form.label" required>
@@ -146,9 +146,29 @@
                 Bootstrap icon
                 <input class="form-control" name="icon" [(ngModel)]="form.icon" placeholder="bi-people">
               </label>
-              <label class="form-label">
+              <label class="form-label permission-field">
                 Required permission
-                <input class="form-control" name="permission" [(ngModel)]="form.required_permission" placeholder="auth.users.read">
+                <div class="permission-select">
+                  <input class="form-control" name="permissionSearch" [(ngModel)]="permissionSearch" (focus)="permissionDropdownOpen = true" (input)="permissionDropdownOpen = true" placeholder="Tìm quyền theo tên hoặc mã" autocomplete="off">
+                  @if (permissionDropdownOpen) {
+                    <div class="permission-options" (mousedown)="$event.preventDefault()">
+                      <button type="button" class="permission-option permission-clear" (click)="form.required_permission = ''; form.href = ''; permissionSearch = ''; permissionDropdownOpen = false">Không yêu cầu quyền</button>
+                      @for (permission of filteredPermissions; track permission.id) {
+                        <button type="button" class="permission-option" (click)="selectPermission(permission)">
+                          <span>{{ permissionLabel(permission) }}</span>
+                          <small>{{ permission.code }} · {{ permission.route }}</small>
+                        </button>
+                      } @empty {
+                        <span class="permission-empty">Không tìm thấy quyền phù hợp</span>
+                      }
+                    </div>
+                  }
+                </div>
+                <small class="permission-value">{{ form.required_permission || 'Chưa chọn quyền' }}</small>
+                @if (permissions.length === 0) {
+                  <small class="text-muted">Không tải được danh sách quyền. Bạn có thể nhập mã thủ công.</small>
+                  <input class="form-control mt-2" name="permissionCode" [(ngModel)]="form.required_permission" placeholder="auth.users.read">
+                }
               </label>
               <label class="form-label">
                 Parent

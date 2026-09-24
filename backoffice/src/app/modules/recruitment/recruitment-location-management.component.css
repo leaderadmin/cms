@@ -1,0 +1,5 @@
+.editor { margin-bottom: 1.5rem; padding: 1.25rem; border: 1px solid var(--bs-border-color); border-radius: .5rem; }
+.editor-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.editor-heading h2 { margin: 0; font-size: 1.1rem; }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+@media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }

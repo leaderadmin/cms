@@ -1,0 +1,13 @@
+<div class="tag-input">
+  <div class="tag-list">
+    @for (tag of tags; track tag) {
+      <span class="tag-chip">{{ tag }} <button type="button" (click)="remove(tag)" [attr.aria-label]="'Remove ' + tag">&times;</button></span>
+    }
+    @if (availableTags.length) {
+      <select class="tag-entry" (change)="selectTag($event)" aria-label="Select product tag"><option value="">Select managed product tag</option>@for (tag of availableTags; track tag.id) { @if (!tagIds.includes(tag.id)) { <option [value]="tag.id">{{ tag.name }}</option> } }</select>
+    }
+    @if (!availableTags.length && !tags.length) {
+      <span class="tag-empty">No managed product tags available.</span>
+    }
+  </div>
+</div>

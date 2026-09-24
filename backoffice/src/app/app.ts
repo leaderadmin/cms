@@ -7,7 +7,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { catchError, forkJoin, of } from 'rxjs';
-import { AuthService, AuthSession, ProfileComponent } from './modules/auth';
+import { AuthService, AuthSession, ProfileComponent, SessionManagementComponent } from './modules/auth';
 import { BackofficeNavItem, BackofficePageComponent, BackofficeShellComponent } from './shared/ui';
 import { RoleManagementComponent, UserCreateComponent, UserManagementComponent } from './modules/users';
 import { MenuBuilderComponent, SettingsComponent } from './modules/settings';
@@ -16,8 +16,13 @@ import { ActivityLogComponent } from './modules/audit/activity-log.component';
 import { EntityManagementComponent } from './modules/entities';
 import { MediaManagerComponent } from './modules/media';
 import { ArticleCreateComponent, ArticleEditComponent, ArticleManagementComponent, CategoryManagementComponent } from './modules/articles';
-import { BlockManagementComponent, ComponentManagementComponent, PageBuilderComponent, PageCreateComponent, PageListComponent } from './modules/pages';
+import { BlockManagementComponent, ComponentManagementComponent, FormManagementComponent, PageBuilderComponent, PageCreateComponent, PageListComponent } from './modules/pages';
 import { TagManagementComponent } from './modules/articles';
+import { AttributeSetManagementComponent, ProductEditComponent, ProductManagementComponent, ProductTagManagementComponent, ProductTypeManagementComponent } from './modules/products';
+import { ProductMetadataFormComponent } from './modules/products/product-metadata-form.component';
+import { RecruitmentLocationManagementComponent, RecruitmentManagementComponent } from './modules/recruitment';
+import { FAQManagementComponent } from './modules/faq';
+import { DealerManagementComponent } from './modules/dealers';
 
 @Component({
   selector: 'app-root',
@@ -31,6 +36,7 @@ import { TagManagementComponent } from './modules/articles';
     BackofficePageComponent,
     BackofficeShellComponent,
     ProfileComponent,
+    SessionManagementComponent,
     UserManagementComponent,
     UserCreateComponent,
     RoleManagementComponent,
@@ -49,15 +55,25 @@ import { TagManagementComponent } from './modules/articles';
     PageListComponent,
     BlockManagementComponent,
     ComponentManagementComponent,
+    FormManagementComponent,
+    ProductManagementComponent,
+    ProductEditComponent,
+    ProductTypeManagementComponent,
+    AttributeSetManagementComponent,
+    ProductTagManagementComponent,
+    ProductMetadataFormComponent,
+    RecruitmentManagementComponent,
+    RecruitmentLocationManagementComponent,
+    FAQManagementComponent,
+    DealerManagementComponent,
   ],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
 export class App {
   private readonly http = inject(HttpClient);
   private readonly menuApi = inject(MenuService);
   protected readonly auth = inject(AuthService);
-
   protected loading = true;
   protected loggingIn = false;
   protected username = 'demo-admin';
@@ -73,7 +89,13 @@ export class App {
   protected authMessage = '';
   protected resetLoading = false;
   protected health: { status?: string; redis?: string } = {};
-  protected stats: { visits?: number; last_cron_run?: { ran_at?: string } | null } = {};
+  protected stats: {
+    visits?: number;
+    last_cron_run?: { ran_at?: string } | null;
+    visits_by_day?: { date: string; visits: number }[];
+    activity_by_day?: { date: string; count: number }[];
+    content_counts?: Record<string, number>;
+  } = {};
   protected sessions: AuthSession[] = [];
   protected view = this.viewFromHash(window.location.hash);
   protected menuItems: MenuItem[] = [];
@@ -131,11 +153,39 @@ export class App {
       {
         label: 'Build Page',
         href: '#build-page',
-        active: this.view === 'pages' || this.view === 'blocks' || this.view === 'components',
+        active: this.view === 'pages' || this.view === 'blocks' || this.view === 'components' || this.view === 'forms',
         children: [
           { label: 'Pages', href: '#pages', view: 'pages', active: this.view === 'pages' || this.view.startsWith('pages/'), requiredPermissions: ['page.read'] },
-          { label: 'Blocks', href: '#blocks', view: 'blocks', active: this.view === 'blocks', requiredPermissions: ['page.component.read'] },
+          { label: 'Blocks', href: '#blocks', view: 'blocks', active: this.view === 'blocks' || this.isBlockCreateView() || this.isBlockEditView(), requiredPermissions: ['page.component.read'] },
           { label: 'Components', href: '#components', view: 'components', active: this.view === 'components', requiredPermissions: ['page.component.read'] },
+          { label: 'Forms', href: '#forms', view: 'forms', active: this.view === 'forms', requiredPermissions: ['page.form.read'] },
+        ],
+      },
+      {
+        label: 'Quản lý hành chính',
+        href: '#administration',
+        active: this.view === 'admin-regions' || this.view === 'admin-areas' || this.view === 'dealers',
+        children: [
+          { label: 'Miền', href: '#admin-regions', view: 'admin-regions', active: this.view === 'admin-regions', requiredPermissions: ['recruitment.department.read'] },
+          { label: 'Khu vực', href: '#admin-areas', view: 'admin-areas', active: this.view === 'admin-areas', requiredPermissions: ['recruitment.department.read'] },
+          { label: 'Đơn vị kinh doanh', href: '#dealers', view: 'dealers', active: this.view === 'dealers', requiredPermissions: ['dealer.read'] },
+        ],
+      },
+      {
+        label: 'Recruitment',
+        href: '#recruitment',
+        active: this.view === 'recruitment',
+        children: [
+          { label: 'Recruitment', href: '#recruitment', view: 'recruitment', active: this.view === 'recruitment', requiredPermissions: ['recruitment.read'] },
+        ],
+      },
+      {
+        label: 'FAQ',
+        href: '#faq',
+        active: this.view === 'faq' || this.view === 'faq-categories' || this.view === 'faq-questions',
+        children: [
+          { label: 'FAQ categories', href: '#faq-categories', view: 'faq-categories', active: this.view === 'faq-categories', requiredPermissions: ['faq.read'] },
+          { label: 'FAQ questions', href: '#faq-questions', view: 'faq-questions', active: this.view === 'faq-questions', requiredPermissions: ['faq.read'] },
         ],
       },
       {
@@ -147,6 +197,17 @@ export class App {
           { label: 'Categories', href: '#categories', view: 'categories', active: this.view === 'categories', requiredPermissions: ['article.category.read'] },
           { label: 'Tags', href: '#tags', view: 'tags', active: this.view === 'tags', requiredPermissions: ['article.tag.read'] },
           { label: 'Media', href: '#media', view: 'media', active: this.view === 'media', requiredPermissions: ['media.read'] },
+        ],
+      },
+      {
+        label: 'Products',
+        href: '#products',
+        active: this.view === 'products' || this.view === 'product-sets' || this.view === 'attribute-sets' || this.view === 'product-tags',
+        requiredPermissions: ['product.read'],
+        children: [
+          { label: 'Catalog structure', href: '#product-sets', view: 'product-sets', active: this.view === 'product-sets', requiredPermissions: ['product.read'] },
+          { label: 'Attribute sets', href: '#attribute-sets', view: 'attribute-sets', active: this.view === 'attribute-sets', requiredPermissions: ['product.read'] },
+          { label: 'Product tags', href: '#product-tags', view: 'product-tags', active: this.view === 'product-tags', requiredPermissions: ['product.tag.read'] },
         ],
       },
     ];
@@ -262,7 +323,7 @@ export class App {
 
     forkJoin({
       health: this.http.get<{ status: string; redis: string }>('/api/health/'),
-      stats: this.http.get<{ visits: number; last_cron_run: { ran_at?: string } | null }>('/api/stats/'),
+      stats: this.http.get<typeof this.stats>('/api/stats/'),
       sessions: this.http.get<AuthSession[]>('/api/auth/sessions/'),
       menu: this.menuApi.list().pipe(catchError(() => of([] as MenuItem[]))),
     }).subscribe({
@@ -286,13 +347,50 @@ export class App {
     if (window.location.hash !== hash) window.history.pushState({}, '', hash);
   }
 
+  protected chartHeight(value: number, values: number[]): number {
+    const maximum = Math.max(...values, 1);
+    return Math.max(8, Math.round((value / maximum) * 100));
+  }
+
+  protected shortDate(value: string): string {
+    return new Intl.DateTimeFormat('en', { weekday: 'short' }).format(new Date(`${value}T12:00:00`));
+  }
+
+  protected contentTotal(): number {
+    return Object.values(this.stats.content_counts || {}).reduce((total, value) => total + value, 0);
+  }
+
+  protected activityValues(): number[] {
+    return (this.stats.activity_by_day || []).map((item) => item.count);
+  }
+
+  protected contentWidth(value: number): number {
+    return this.contentTotal() ? Math.max(4, Math.round((value / this.contentTotal()) * 100)) : 0;
+  }
+
   protected isArticleEditView(): boolean {
     return /^articles\/\d+\/edit$/.test(this.view);
+  }
+
+  protected isProductEditView(): boolean {
+    return /^products\/(new|\d+\/edit)(?:\?.*)?$/.test(this.view);
+  }
+
+  protected isProductMetadataFormView(): boolean {
+    return /^(product-sets|product-groups|attributes|attribute-sets)\/(new|edit\/\d+)(?:\?.*)?$/.test(this.view);
   }
 
   protected isPageEditView(): boolean {
     return /^pages\/edit\/\d+$/.test(this.view);
   }
+
+  protected isComponentsView(): boolean {
+    return /^components(?:\?.*)?$/.test(this.view);
+  }
+
+  protected isBlockCreateView(): boolean { return this.view === 'blocks/new'; }
+  protected isBlockEditView(): boolean { return /^blocks\/edit\/[0-9]+$/.test(this.view); }
+  protected blockIdFromView(): number | null { const match = this.view.match(/^blocks\/edit\/([0-9]+)$/); return match ? Number(match[1]) : null; }
 
   protected pageIdFromView(): number | null {
     const match = this.view.match(/^pages\/edit\/(\d+)$/);

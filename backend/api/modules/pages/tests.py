@@ -2,7 +2,9 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from ...models import Page, PageComponent, PageComponentDefinition, PageTemplate, PageVersion
+from ...models import Article, ArticleCategory, ArticleTranslation, Page, PageComponent, PageComponentDefinition, PageTemplate, PageVersion
+from .content_resolver import resolve_source
+from .serializers import form_payload, validate_form_fields
 
 
 class PageDraftValidationTests(TestCase):
@@ -81,6 +83,41 @@ class PageDraftValidationTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["block"]["props"]["items"], [])
+
+    def test_article_source_can_filter_by_category_and_limit(self):
+        category = ArticleCategory.objects.create(name="News", status=1)
+        other_category = ArticleCategory.objects.create(name="Other", status=1)
+        first = Article.objects.create(name="First", status=Article.STATUS_APPROVED)
+        second = Article.objects.create(name="Second", status=Article.STATUS_APPROVED)
+        excluded = Article.objects.create(name="Excluded", status=Article.STATUS_APPROVED)
+        first.categories.add(category)
+        second.categories.add(category)
+        excluded.categories.add(other_category)
+        for article in (first, second, excluded):
+            ArticleTranslation.objects.create(article=article, language_code="vi", title=article.name)
+
+        items = resolve_source({"collection": "articles", "filter": {"category_id": category.id}, "limit": 1})
+
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]["id"], second.id)
+
+    def test_article_source_can_select_article_ids(self):
+        first = Article.objects.create(name="First", status=Article.STATUS_APPROVED)
+        second = Article.objects.create(name="Second", status=Article.STATUS_APPROVED)
+        for article in (first, second):
+            ArticleTranslation.objects.create(article=article, language_code="vi", title=article.name)
+
+        items = resolve_source({"collection": "articles", "filter": {"ids": [first.id]}, "limit": 10})
+
+        self.assertEqual([item["id"] for item in items], [first.id])
+
+    def test_page_source_returns_only_published_selected_pages(self):
+        published = Page.objects.create(name="Published page", slug="published-content", template=self.template, template_key=self.template.key, status=Page.STATUS_PUBLISHED)
+        Page.objects.create(name="Draft page", slug="draft-content", template=self.template, template_key=self.template.key, status=Page.STATUS_DRAFT)
+
+        items = resolve_source({"collection": "pages", "filter": {"ids": [published.id]}, "limit": 10})
+
+        self.assertEqual(items, [{"id": published.id, "title": "Published page", "name": "Published page", "slug": "published-content", "url": "/published-content", "template_key": self.template.key, "status": Page.STATUS_PUBLISHED}])
 
     def test_patch_accepts_registered_component_in_unlocked_region(self):
         PageComponentDefinition.objects.create(name="Demo header", component_key="demo-header")
@@ -163,3 +200,60 @@ class PageDraftValidationTests(TestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertIn("missing-block", response.data["detail"])
+
+
+class DynamicFormSchemaValidationTests(TestCase):
+    def test_accepts_http_submit_url(self):
+        payload, error = form_payload({
+            "name": "Contact",
+            "short_code": "contact",
+            "submit_url": "https://example.test/api/contact",
+            "fields": [],
+        })
+
+        self.assertIsNone(error)
+        self.assertEqual(payload["submit_url"], "https://example.test/api/contact")
+
+    def test_rejects_non_http_submit_url(self):
+        payload, error = form_payload({
+            "name": "Contact",
+            "short_code": "contact",
+            "submit_url": "javascript:alert(1)",
+            "fields": [],
+        })
+
+        self.assertIsNone(payload)
+        self.assertIn("HTTP or HTTPS", error)
+
+    def test_rejects_invalid_regex(self):
+        fields, error = validate_form_fields([{
+            "key": "email",
+            "label": "Email",
+            "type": "text",
+            "rules": {"pattern": "["},
+        }])
+
+        self.assertIsNone(fields)
+        self.assertIn("pattern", error)
+
+    def test_rejects_select_default_outside_options(self):
+        fields, error = validate_form_fields([{
+            "key": "department",
+            "label": "Department",
+            "type": "select",
+            "default": "sales",
+            "options": [{"label": "Support", "value": "support"}],
+        }])
+
+        self.assertIsNone(fields)
+        self.assertIn("Default", error)
+
+    def test_rejects_reserved_field_key(self):
+        fields, error = validate_form_fields([{
+            "key": "submit",
+            "label": "Submit",
+            "type": "text",
+        }])
+
+        self.assertIsNone(fields)
+        self.assertIn("invalid", error)

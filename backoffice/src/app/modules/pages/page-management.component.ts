@@ -67,10 +67,10 @@ export class PageManagementComponent {
     return {
       name: '', key: '', status: 'published',
       regions: [
-        { key: 'header', label: 'header', locked: true, max_blocks: 1, allowed_blocks: [] },
+        { key: 'header', label: 'header', locked: false, max_blocks: 1, allowed_blocks: [] },
         { key: 'hero', label: 'hero', locked: false, max_blocks: 1, allowed_blocks: ['hero-slider', 'hero-static'] },
         { key: 'main', label: 'main', locked: false, max_blocks: null, allowed_blocks: ['quick-links', 'product-cards', 'exchange-rate-table', 'news-list', 'cta-banner'] },
-        { key: 'footer', label: 'footer', locked: true, max_blocks: 1, allowed_blocks: [] },
+        { key: 'footer', label: 'footer', locked: false, max_blocks: 1, allowed_blocks: [] },
       ],
       tokens: { primary_color: '#0C447C', radius: '8px', font: 'Inter' },
     };

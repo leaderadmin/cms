@@ -25,7 +25,7 @@ h1 { margin: 18px 0 12px; font-size: clamp(42px, 8vw, 78px); line-height: .92; f
 .pulse { width: 9px; height: 9px; border-radius: 50%; background: #4da77f; }
 .pulse.is-down { background: #ef765d; }
 .divider { color: #d9ddd7; }
-.metrics { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
 .metric-card { min-height: 220px; padding: 28px; }
 .metric-card.accent { color: #fffdf9; background: #17252f; border-color: #17252f; }
 .metric-label, .metric-note { display: block; font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; text-transform: uppercase; letter-spacing: 1px; }
@@ -33,6 +33,19 @@ h1 { margin: 18px 0 12px; font-size: clamp(42px, 8vw, 78px); line-height: .92; f
 .metric-value { display: block; margin: 42px 0 10px; font-size: 56px; font-weight: 400; line-height: 1; }
 .metric-value.small { margin-top: 49px; font-size: 24px; overflow-wrap: anywhere; }
 .metric-note { color: #68767d; text-transform: none; letter-spacing: 0; }
+.charts-grid { display: grid; grid-template-columns: 1.35fr .65fr; gap: 18px; margin-top: 18px; }
+.chart-panel { min-height: 290px; padding: 26px 28px; }
+.bar-chart { display: flex; align-items: end; gap: 16px; height: 190px; margin-top: 24px; padding-top: 12px; border-bottom: 1px solid #d9ddd7; }
+.bar-column { display: flex; flex: 1; flex-direction: column; align-items: center; height: 100%; min-width: 24px; }
+.bar-value { min-height: 17px; color: #68767d; font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; }
+.bar-track { display: flex; flex: 1; align-items: end; width: 100%; max-width: 34px; margin: 6px 0 10px; background: #eef1ec; }
+.bar-fill { display: block; width: 100%; min-height: 8px; background: #ef765d; transition: height .35s ease; }
+.bar-label { color: #68767d; font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; }
+.content-mix { display: grid; gap: 18px; margin-top: 28px; }
+.mix-row { display: grid; grid-template-columns: 90px 32px 1fr; gap: 10px; align-items: center; color: #68767d; font-size: 13px; }
+.mix-row strong { color: #17252f; font-weight: 500; text-align: right; }
+.mix-track { height: 8px; background: #eef1ec; }
+.mix-track i { display: block; height: 100%; background: #4da77f; }
 .error { color: #ef765d; }
 .form-error { margin: 0 0 20px; padding: 12px; color: #9d3f2d; background: #fbe5df; font-size: 14px; }
 .login-form { display: flex; flex-direction: column; gap: 8px; }
@@ -58,5 +71,6 @@ mat-chip-set { display: block; margin-top: 24px; }
 .session-row strong { font-size: 14px; font-weight: 400; }
 .session-row small { margin-top: 4px; color: #68767d; font-size: 12px; }
 .session-state { color: #4da77f; font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; text-transform: uppercase; }
+@media (max-width: 900px) { .metrics { grid-template-columns: repeat(2, 1fr); } .charts-grid { grid-template-columns: 1fr; } }
 @media (max-width: 600px) { .shell { padding-top: 40px; } .refresh { position: static; margin-top: 22px; } .metrics { grid-template-columns: 1fr; } .metric-card { min-height: 180px; } }
 @media (max-width: 700px) { .details-grid { grid-template-columns: 1fr; } .topbar { margin-bottom: 42px; } .toolbar-title { font-size: 12px; } .login-panel { padding: 28px; } }

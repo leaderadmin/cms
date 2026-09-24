@@ -6,3 +6,4 @@ export * from './page-list.component';
 export * from './page-create.component';
 export * from './block-management.component';
 export * from './component-management.component';
+export * from './form-management.component';

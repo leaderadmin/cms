@@ -21,7 +21,21 @@ h1 { margin: 0; color: #1d2f39; font-size: 32px; font-weight: 600; }
 .menu-modal .modal-content { border: 1px solid rgba(29, 47, 57, .12); border-radius: 6px; box-shadow: 0 18px 48px rgba(18, 34, 42, .28); }
 .menu-modal .modal-header, .menu-modal .modal-footer { padding: 16px 20px; background: #fff; }
 .menu-modal .modal-title { margin: 0; color: #1d2f39; font-size: 17px; font-weight: 600; }
+.permission-select { position: relative; }
+.permission-options { position: absolute; z-index: 4; top: calc(100% + 4px); right: 0; left: 0; max-height: 250px; overflow-y: auto; border: 1px solid #cddbd8; border-radius: 4px; background: #fff; box-shadow: 0 8px 22px rgba(29, 47, 57, .16); }
+.permission-option { display: block; width: 100%; padding: 9px 11px; border: 0; border-bottom: 1px solid #edf1ef; background: #fff; color: #1d2f39; text-align: left; }
+.permission-option:hover { background: #f0f8f6; }
+.permission-option span, .permission-option small { display: block; }
+.permission-option span { font-weight: 600; }
+.permission-option small, .permission-value { color: #6c7a80; font-size: 11px; font-weight: 400; }
+.permission-clear { color: #25727a; }
+.permission-empty { display: block; padding: 12px; color: #6c7a80; font-size: 12px; }
 .menu-modal .modal-body { padding: 20px; background: #fff; }
+.menu-item-form-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-content: start; gap: 0 16px; overflow: visible; }
+.menu-item-form-body > .form-label { min-width: 0; }
+.menu-item-form-body .permission-field, .menu-item-form-body > .form-check { grid-column: 1 / -1; }
+.menu-item-form-body .permission-options { width: 100%; }
+.menu-item-form-body .form-control, .menu-item-form-body .form-select { min-width: 0; }
 .menu-modal + .modal-backdrop { position: fixed; z-index: 1050; inset: 0; display: block; opacity: .5; }
 .card { border: 1px solid rgba(29, 47, 57, .12); border-radius: 6px; box-shadow: 0 2px 8px rgba(29, 47, 57, .08); }
 .card-header, .card-footer { padding: 16px 20px; background: #fff; }
@@ -55,4 +69,4 @@ h1 { margin: 0; color: #1d2f39; font-size: 32px; font-weight: 600; }
 .icon-action.danger:hover { background: #fce9e5; }
 .empty-state { padding: 28px 12px; color: #6c7a80; text-align: center; }
 .alert { margin-bottom: 20px; }
-@media (max-width: 800px) { .builder-header { align-items: start; flex-direction: column; } .builder-grid { grid-template-columns: 1fr; } .menu-form-fields { grid-template-columns: 1fr; } }
+@media (max-width: 800px) { .builder-header { align-items: start; flex-direction: column; } .builder-grid { grid-template-columns: 1fr; } .menu-form-fields, .menu-item-form-body { grid-template-columns: 1fr; } .menu-item-form-body .permission-field, .menu-item-form-body > .form-check { grid-column: auto; } }

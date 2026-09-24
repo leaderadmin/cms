@@ -39,7 +39,5 @@
 .content-editor { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .82rem; }
 .editor-actions { display: flex; justify-content: flex-end; margin-top: 1rem; }
 .row-actions { white-space: nowrap; }
-.icon-button { background: transparent; border: 0; color: #475467; padding: .35rem; }
-.icon-button:hover { color: #111827; }
-.icon-button.danger:hover { color: #b42318; }
+.icon-button { background: transparent; border: 0; padding: .35rem; }
 @media (max-width: 760px) { .editor-grid { grid-template-columns: 1fr; } .editor-grid .wide { grid-column: auto; } }

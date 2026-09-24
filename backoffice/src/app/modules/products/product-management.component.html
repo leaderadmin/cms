@@ -1,0 +1,145 @@
+<app-backoffice-page
+  eyebrow="CONTENT / PRODUCTS"
+  title="Product management"
+  description="Quản lý sản phẩm có cấu trúc và đưa dữ liệu vào Build Page."
+  [loading]="loading"
+  [error]="error"
+  (retry)="load()"
+>
+  <div page-actions class="page-actions">
+    <button class="btn btn-light" type="button" (click)="startProductSets()"><i class="bi bi-collection"></i> Catalog structure</button>
+    <button class="btn btn-primary" type="button" (click)="startCreate()">
+      <i class="bi bi-plus-lg"></i> New product</button
+    ><button
+      class="btn btn-dark"
+      type="button"
+      (click)="load()"
+      [disabled]="loading"
+    >
+      <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+  </div>
+  <section class="product-toolbar">
+    <input
+      class="form-control"
+      type="search"
+      placeholder="Search product"
+      [(ngModel)]="query"
+      (keyup.enter)="load(1)"
+    /><select class="form-select" [(ngModel)]="kind" (change)="load(1)">
+      <option value="">All product groups</option>
+      @for (item of metadata.groups; track item.id) {
+        <option [value]="item.slug">{{ item.name }}</option>
+      }</select
+    ><select class="form-select" [(ngModel)]="status" (change)="load(1)">
+      <option value="">All statuses</option>
+      <option value="1">Active</option>
+      <option value="0">Draft</option>
+      <option value="-1">Archived</option></select
+    ><button class="btn btn-outline-secondary" type="button" (click)="load(1)">
+      <i class="bi bi-search"></i> Search
+    </button>
+  </section>
+  <div class="product-workspace">
+    <section class="product-list">
+      <div class="product-summary">
+        <strong>{{ total }}</strong> products
+        <span>Page {{ page }} / {{ totalPages }}</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Group</th>
+              <th>Type / category</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (product of products; track product.id) {
+              <tr>
+                <td>
+                  <strong>{{
+                    product.translation?.title || product.name
+                  }}</strong
+                  ><small>{{ product.slug }}</small>
+                </td>
+                <td>
+                  <span class="kind-badge">{{ product.kind }}</span>
+                </td>
+                <td>
+                  <strong>{{ product.product_type?.name || "No type" }}</strong
+                  ><small>{{ product.category?.name || "No category" }}</small>
+                </td>
+                <td>
+                  <span
+                    class="status-badge"
+                    [class.active]="product.status === 1"
+                    [class.pending]="product.status === 0"
+                    >{{ product.status_label }}</span
+                  >
+                </td>
+                <td class="row-actions">
+                  <button
+                    class="icon-button"
+                    type="button"
+                    title="Edit product"
+                    (click)="startEdit(product)"
+                  >
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  @if (product.status !== 1) {
+                    <button
+                      class="icon-button"
+                      type="button"
+                      title="Publish product"
+                      (click)="publish(product)"
+                    >
+                      <i class="bi bi-send"></i>
+                    </button>
+                  }
+                  @if (product.status !== -1) {
+                    <button
+                      class="icon-button danger"
+                      type="button"
+                      title="Archive product"
+                      (click)="archive(product)"
+                    >
+                      <i class="bi bi-archive"></i>
+                    </button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="empty-state">
+                  No products match these filters.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <nav class="product-pagination">
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="load(page - 1)"
+          [disabled]="page <= 1 || loading"
+        >
+          Previous</button
+        ><span>Page {{ page }} / {{ totalPages }}</span
+        ><button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="load(page + 1)"
+          [disabled]="page >= totalPages || loading"
+        >
+          Next
+        </button>
+      </nav>
+    </section>
+  </div>
+</app-backoffice-page>

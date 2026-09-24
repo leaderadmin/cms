@@ -1,0 +1,30 @@
+<app-backoffice-page
+  eyebrow="MONITORING / SECURITY"
+  title="Sessions"
+  description="Review signed-in devices and revoke sessions you no longer recognize."
+  [loading]="loading"
+  [error]="error"
+  (retry)="load()"
+>
+  <div page-actions class="page-actions">
+    <button class="btn btn-outline-secondary" type="button" (click)="load()" [disabled]="loading"><i class="bi bi-arrow-clockwise"></i> Refresh</button>
+  </div>
+
+  <section class="session-list" aria-label="Signed-in sessions">
+    @for (session of sessions; track session.session_id) {
+      <article class="session-row" [class.revoked]="!session.active">
+        <div class="session-icon"><i class="bi" [class.bi-laptop]="session.user_agent.toLowerCase().includes('macintosh') || session.user_agent.toLowerCase().includes('windows')" [class.bi-phone]="session.user_agent.toLowerCase().includes('mobile')" [class.bi-globe2]="!session.user_agent.toLowerCase().includes('macintosh') && !session.user_agent.toLowerCase().includes('windows') && !session.user_agent.toLowerCase().includes('mobile')"></i></div>
+        <div class="session-details">
+          <div class="session-title"><strong>{{ session.user_agent || 'Unknown device' }}</strong><span class="status-badge" [class.active]="session.active" [class.revoked]="!session.active">{{ session.active ? 'Active' : 'Revoked' }}</span></div>
+          <div class="session-meta"><span><i class="bi bi-globe2"></i>{{ session.ip_address || 'Unknown IP' }}</span><span><i class="bi bi-calendar3"></i>Created {{ session.created_at | date:'medium' }}</span><span><i class="bi bi-clock-history"></i>Last seen {{ session.last_seen_at | date:'medium' }}</span></div>
+          @if (session.revoked_at) { <small class="revoked-time">Revoked {{ session.revoked_at | date:'medium' }}</small> }
+        </div>
+        @if (session.active) {
+          <button class="btn btn-outline-danger" type="button" (click)="revoke(session)" [disabled]="revoking === session.session_id"><i class="bi bi-shield-x"></i> {{ revoking === session.session_id ? 'Revoking...' : 'Revoke' }}</button>
+        }
+      </article>
+    } @empty {
+      @if (!loading) { <div class="empty-state"><i class="bi bi-shield-check"></i><strong>No sessions found</strong><span>There are no recorded sessions for this account.</span></div> }
+    }
+  </section>
+</app-backoffice-page>

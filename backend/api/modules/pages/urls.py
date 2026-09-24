@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import DraftPageView, PageComponentDefinitionDetailView, PageComponentDefinitionListView, PageComponentDetailView, PageComponentListView, PageDetailView, PageListView, PageTemplateDetailView, PageTemplateListView, PreviewContentView, PublishPageView, PublishedPageView
+from .views import DraftPageView, DynamicFormDetailView, DynamicFormListView, PageComponentDefinitionDetailView, PageComponentDefinitionListView, PageComponentDetailView, PageComponentListView, PageDetailView, PageListView, PageTemplateDetailView, PageTemplateListView, PreviewContentView, PublishPageView, PublishedPageView
 
 urlpatterns = [
     path("", PageListView.as_view(), name="page-list"),
@@ -8,6 +8,8 @@ urlpatterns = [
     path("templates/<int:template_id>/", PageTemplateDetailView.as_view(), name="page-template-detail"),
     path("components/", PageComponentListView.as_view(), name="page-component-list"),
     path("components/<int:component_id>/", PageComponentDetailView.as_view(), name="page-component-detail"),
+    path("forms/", DynamicFormListView.as_view(), name="dynamic-form-list"),
+    path("forms/<int:form_id>/", DynamicFormDetailView.as_view(), name="dynamic-form-detail"),
     path("component-definitions/", PageComponentDefinitionListView.as_view(), name="page-component-definition-list"),
     path("component-definitions/<int:component_id>/", PageComponentDefinitionDetailView.as_view(), name="page-component-definition-detail"),
     path("<slug:slug>/draft/", DraftPageView.as_view(), name="page-draft"),

@@ -1,5 +1,30 @@
 export type PageStatus = 'draft' | 'published' | 'archived';
 export type PageModuleType = 'card' | 'form' | 'table' | 'modal';
+export type DynamicFormFieldType = 'text' | 'textarea' | 'email' | 'number' | 'select' | 'checkbox' | 'date' | 'file';
+
+export interface DynamicFormField {
+  key: string;
+  label: string;
+  type: DynamicFormFieldType;
+  placeholder: string;
+  default: unknown;
+  options: Array<{ label: string; value: string }>;
+  rules: { required?: boolean; min?: number; max?: number; pattern?: string };
+}
+
+export interface DynamicForm {
+  id: number;
+  name: string;
+  short_code: string;
+  description: string;
+  submit_url: string;
+  fields: DynamicFormField[];
+  status: PageStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export type DynamicFormInput = Omit<DynamicForm, 'id' | 'created_at' | 'updated_at'>;
 
 export interface PageModule {
   id?: string;
@@ -20,9 +45,12 @@ export interface Page {
   id: number;
   name: string;
   slug: string;
+  short_code: string | null;
   template_key: string;
   status: PageStatus;
   components: PageComponent[];
+  article_ids: number[];
+  content_config: PageContentConfig;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -34,10 +62,16 @@ export interface Page {
 export interface PageInput {
   name: string;
   slug: string;
+  short_code: string;
   template_key: string;
   status: PageStatus;
   components: PageComponent[];
+  article_ids: number[];
+  content_config: PageContentConfig;
 }
+
+export type PageContentMode = 'articles' | 'category' | 'editor' | 'form';
+export interface PageContentConfig { mode: PageContentMode; article_ids: number[]; category_id?: number; form_short_code?: string; html?: string; css?: string; js?: string; }
 
 export interface PageTemplateRegion {
   id?: string;
@@ -68,6 +102,7 @@ export interface ReusablePageComponent {
   id: number;
   name: string;
   block_name: string;
+  short_code: string | null;
   html: string;
   css: string;
   js: string;
@@ -83,6 +118,7 @@ export interface PageComponentDefinition {
   id: number;
   name: string;
   component_key: string;
+  short_code: string | null;
   prehtml: string;
   html: string;
   css: string;

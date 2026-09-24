@@ -285,10 +285,13 @@ class Page(models.Model):
 
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
+    short_code = models.SlugField(max_length=120, unique=True, null=True, blank=True)
     template_key = models.CharField(max_length=120, default="standard-page")
     template = models.ForeignKey("PageTemplate", on_delete=models.SET_NULL, null=True, blank=True, related_name="pages")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_DRAFT)
     components = models.JSONField(default=list, blank=True)
+    article_ids = models.JSONField(default=list, blank=True)
+    content_config = models.JSONField(default=dict, blank=True)
     published_version = models.ForeignKey("PageVersion", on_delete=models.SET_NULL, null=True, blank=True, related_name="published_pages")
     draft_version = models.ForeignKey("PageVersion", on_delete=models.SET_NULL, null=True, blank=True, related_name="draft_pages")
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="pages")
@@ -321,6 +324,7 @@ class PageTemplate(models.Model):
 class PageComponent(models.Model):
     name = models.CharField(max_length=255)
     block_name = models.SlugField(max_length=120, unique=True)
+    short_code = models.SlugField(max_length=120, unique=True, null=True, blank=True)
     html = models.TextField(blank=True)
     css = models.TextField(blank=True)
     js = models.TextField(blank=True)
@@ -336,9 +340,27 @@ class PageComponent(models.Model):
         return self.name
 
 
+class DynamicForm(models.Model):
+    name = models.CharField(max_length=255)
+    short_code = models.SlugField(max_length=120, unique=True)
+    description = models.TextField(blank=True)
+    submit_url = models.URLField(blank=True)
+    fields = models.JSONField(default=list, blank=True)
+    status = models.CharField(max_length=20, choices=Page.STATUS_CHOICES, default=Page.STATUS_DRAFT)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("name", "id")
+
+    def __str__(self):
+        return self.name
+
+
 class PageComponentDefinition(models.Model):
     name = models.CharField(max_length=255)
     component_key = models.SlugField(max_length=120, unique=True)
+    short_code = models.SlugField(max_length=120, unique=True, null=True, blank=True)
     prehtml = models.TextField(blank=True)
     html = models.TextField(blank=True)
     css = models.TextField(blank=True)
@@ -460,4 +482,253 @@ class EmailTemplate(models.Model):
 
     class Meta:
         ordering = ("name",)
+
+
+class ProductGroup(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+    slug = models.SlugField(max_length=140, unique=True)
+    product_type = models.ForeignKey("ProductType", on_delete=models.CASCADE, null=True, blank=True, related_name="groups")
+    status = models.SmallIntegerField(default=1)
+    ordering = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("ordering", "name", "id")
+
+
+class ProductType(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+    slug = models.SlugField(max_length=140, unique=True)
+    status = models.SmallIntegerField(default=1)
+    ordering = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("ordering", "name", "id")
+
+
+class ProductCategory(models.Model):
+    name = models.CharField(max_length=160)
+    slug = models.SlugField(max_length=180, unique=True)
+    parent = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="children")
+    product_type = models.ForeignKey(ProductType, on_delete=models.SET_NULL, null=True, blank=True, related_name="categories")
+    status = models.SmallIntegerField(default=1)
+    ordering = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("ordering", "name", "id")
+
+
+class ProductAttribute(models.Model):
+    name = models.CharField(max_length=160)
+    slug = models.SlugField(max_length=180, unique=True)
+    value_type = models.CharField(max_length=30, default="text")
+    status = models.SmallIntegerField(default=1)
+    ordering = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("ordering", "name", "id")
+
+
+class ProductAttributeSet(models.Model):
+    name = models.CharField(max_length=160, unique=True)
+    slug = models.SlugField(max_length=180, unique=True)
+    attributes = models.ManyToManyField(ProductAttribute, blank=True, related_name="attribute_sets")
+    ordering = models.IntegerField(default=0)
+    status = models.SmallIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("ordering", "name", "id")
+
+
+class ProductTag(models.Model):
+    name = models.CharField(max_length=80, unique=True)
+    slug = models.SlugField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("name",)
+
+    def __str__(self):
+        return self.name
+
+
+class Product(models.Model):
+    STATUS_DRAFT = 0
+    STATUS_ACTIVE = 1
+    STATUS_ARCHIVED = -1
+    STATUS_CHOICES = ((STATUS_DRAFT, "Draft"), (STATUS_ACTIVE, "Active"), (STATUS_ARCHIVED, "Archived"))
+    KIND_CHOICES = (("card", "Card"), ("loan", "Loan"), ("saving", "Saving"), ("service", "Service"), ("promotion", "Promotion"))
+
+    legacy_id = models.CharField(max_length=40, unique=True, null=True, blank=True)
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=280, unique=True)
+    kind = models.CharField(max_length=30, default="service")
+    product_type = models.ForeignKey(ProductType, on_delete=models.SET_NULL, null=True, blank=True, related_name="products")
+    category = models.ForeignKey(ProductCategory, on_delete=models.SET_NULL, null=True, blank=True, related_name="products")
+    attribute_set = models.ForeignKey(ProductAttributeSet, on_delete=models.SET_NULL, null=True, blank=True, related_name="products")
+    managed_tags = models.ManyToManyField(ProductTag, blank=True, related_name="products")
+    image = models.ForeignKey(MediaFile, on_delete=models.SET_NULL, null=True, blank=True, related_name="products")
+    status = models.SmallIntegerField(choices=STATUS_CHOICES, default=STATUS_DRAFT)
+    ordering = models.IntegerField(default=0)
+    is_featured = models.BooleanField(default=False)
+    attributes = models.JSONField(default=dict, blank=True)
+    extra_data = models.JSONField(default=dict, blank=True)
+    start_date = models.DateTimeField(null=True, blank=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="products")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("ordering", "-updated_at", "-id")
+        indexes = [models.Index(fields=("kind", "status")), models.Index(fields=("category", "status"))]
+
+
+class ProductTranslation(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="translations")
+    language_code = models.CharField(max_length=10)
+    title = models.CharField(max_length=255)
+    short_description = models.TextField(blank=True)
+    content = models.TextField(blank=True)
+    url_key = models.CharField(max_length=280)
+    seo_title = models.CharField(max_length=255, blank=True)
+    meta_keyword = models.CharField(max_length=255, blank=True)
+    meta_description = models.TextField(blank=True)
+    status = models.SmallIntegerField(default=Product.STATUS_DRAFT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=("product", "language_code"), name="unique_product_language")]
+        indexes = [models.Index(fields=("language_code", "status")), models.Index(fields=("url_key", "language_code"))]
+
+
+class RecruitmentDepartment(models.Model):
+    name = models.CharField(max_length=160, unique=True)
+    slug = models.SlugField(max_length=180, unique=True)
+    status = models.SmallIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("name", "id")
+
+
+class RecruitmentRegion(models.Model):
+    legacy_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    name = models.CharField(max_length=120, unique=True)
+    slug = models.SlugField(max_length=140, unique=True)
+    status = models.SmallIntegerField(default=1)
+
+    class Meta:
+        ordering = ("name", "id")
+
+
+class RecruitmentArea(models.Model):
+    legacy_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    region = models.ForeignKey(RecruitmentRegion, on_delete=models.CASCADE, related_name="areas")
+    name = models.CharField(max_length=160)
+    slug = models.SlugField(max_length=180)
+    status = models.SmallIntegerField(default=1)
+
+    class Meta:
+        ordering = ("name", "id")
+        constraints = [models.UniqueConstraint(fields=("region", "name"), name="unique_recruitment_area_region_name")]
+
+
+class RecruitmentJob(models.Model):
+    STATUS_DRAFT = 0
+    STATUS_PUBLISHED = 1
+    STATUS_CLOSED = -1
+    STATUS_CHOICES = ((STATUS_DRAFT, "Draft"), (STATUS_PUBLISHED, "Published"), (STATUS_CLOSED, "Closed"))
+
+    legacy_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    title = models.CharField(max_length=255)
+    slug = models.SlugField(max_length=280, unique=True)
+    department = models.CharField(max_length=160, blank=True)
+    department_ref = models.ForeignKey(RecruitmentDepartment, on_delete=models.SET_NULL, null=True, blank=True, related_name="jobs")
+    region = models.ForeignKey(RecruitmentRegion, on_delete=models.SET_NULL, null=True, blank=True, related_name="recruitment_jobs")
+    area = models.ForeignKey(RecruitmentArea, on_delete=models.SET_NULL, null=True, blank=True, related_name="recruitment_jobs")
+    business_unit = models.ForeignKey("Dealer", on_delete=models.SET_NULL, null=True, blank=True, related_name="recruitment_jobs")
+    managed_tags = models.ManyToManyField(ProductTag, blank=True, related_name="recruitment_jobs")
+    location = models.CharField(max_length=160, blank=True)
+    employment_type = models.CharField(max_length=80, blank=True)
+    description = models.TextField(blank=True)
+    requirements = models.TextField(blank=True)
+    benefits = models.TextField(blank=True)
+    deadline = models.DateField(null=True, blank=True)
+    status = models.SmallIntegerField(choices=STATUS_CHOICES, default=STATUS_DRAFT)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-updated_at", "-id")
+
+
+class FAQCategory(models.Model):
+    legacy_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    name = models.CharField(max_length=160)
+    slug = models.SlugField(max_length=180, unique=True)
+    ordering = models.IntegerField(default=0)
+    status = models.SmallIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("ordering", "name", "id")
+
+
+class FAQQuestion(models.Model):
+    legacy_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    category = models.ForeignKey(FAQCategory, on_delete=models.CASCADE, related_name="questions")
+    question_vi = models.TextField()
+    answer_vi = models.TextField()
+    question_en = models.TextField(blank=True)
+    answer_en = models.TextField(blank=True)
+    ordering = models.IntegerField(default=0)
+    status = models.SmallIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("ordering", "id")
+
+
+class Dealer(models.Model):
+    TYPE_BRANCH = "branch"
+    TYPE_ATM = "atm"
+    TYPE_TRANSACTION_OFFICE = "transaction_office"
+    TYPE_CHOICES = (
+        (TYPE_BRANCH, "Chi nhánh"),
+        (TYPE_ATM, "ATM"),
+        (TYPE_TRANSACTION_OFFICE, "Phòng giao dịch"),
+    )
+    legacy_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    name = models.CharField(max_length=255)
+    code = models.CharField(max_length=80, unique=True)
+    dealer_type = models.CharField(max_length=32, choices=TYPE_CHOICES, default=TYPE_BRANCH)
+    area = models.ForeignKey("RecruitmentArea", on_delete=models.SET_NULL, null=True, blank=True, related_name="business_units")
+    province_city = models.CharField(max_length=160, blank=True)
+    address = models.CharField(max_length=500, blank=True)
+    hotline = models.CharField(max_length=80, blank=True)
+    email = models.EmailField(blank=True)
+    latitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    opening_hours = models.CharField(max_length=255, blank=True)
+    status = models.SmallIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("province_city", "name", "id")
 

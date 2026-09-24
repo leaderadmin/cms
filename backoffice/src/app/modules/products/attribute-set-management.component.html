@@ -1,0 +1,50 @@
+<app-backoffice-page
+  eyebrow="CONTENT / PRODUCTS / ATTRIBUTE SETS"
+  title="Attribute sets"
+  description="Create reusable collections of Product Attributes and assign them to Products."
+  [loading]="loading"
+  [error]="error"
+  (retry)="load()"
+>
+  <div page-actions class="page-actions">
+    <button class="btn btn-light" type="button" (click)="goToProducts()"><i class="bi bi-arrow-left"></i> Back to products</button>
+    <button class="btn btn-light" type="button" (click)="goToAttributeCreate()"><i class="bi bi-plus-lg"></i> New Attribute</button>
+    <button class="btn btn-primary" type="button" (click)="goToSetCreate()"><i class="bi bi-collection"></i> New set</button>
+  </div>
+
+  @if (!loading) {
+    <section class="metadata-table attribute-manager hierarchy-panel">
+      <div class="section-topline"><div><span class="panel-kicker">ATTRIBUTE CATALOG HIERARCHY</span><h2>Attribute sets</h2></div><span class="count-pill">{{ metadata.attribute_sets.length }} sets</span></div>
+      <p class="section-help">Each set is a reusable collection of fields. Click a set to view and edit its Attributes.</p>
+      <div class="set-tree">
+        @for (item of metadata.attribute_sets; track item.id) {
+          <article class="set-node" [class.expanded]="isExpanded(item.id)">
+            <div class="set-row">
+              <button class="expand-button" type="button" (click)="toggleSet(item.id)" [attr.aria-expanded]="isExpanded(item.id)" [attr.aria-label]="isExpanded(item.id) ? 'Collapse ' + item.name : 'Expand ' + item.name"><i class="bi" [class.bi-chevron-down]="isExpanded(item.id)" [class.bi-chevron-right]="!isExpanded(item.id)"></i></button>
+              <div class="set-identity"><strong>{{ item.name }}</strong><code>{{ item.slug }}</code></div>
+              <span class="child-count">{{ item.attributes.length }} Attributes</span>
+              <button class="icon-button" type="button" (click)="edit('attribute-sets', item.id)" title="Edit Attribute set"><i class="bi bi-pencil"></i></button>
+            </div>
+            @if (isExpanded(item.id)) {
+              <div class="attribute-tree">
+                @for (attribute of item.attributes; track attribute.id) {
+                  <div class="attribute-row"><i class="bi bi-input-cursor-text"></i><div><strong>{{ attribute.name }}</strong><code>{{ attribute.slug }} · {{ attribute.value_type }}</code></div><button class="icon-button" type="button" (click)="edit('attributes', attribute.id)" title="Edit Attribute"><i class="bi bi-pencil"></i></button></div>
+                } @empty {
+                  <div class="empty-callout"><i class="bi bi-input-cursor-text"></i><strong>No Attributes in this set</strong><span>Edit the set to add Attributes.</span></div>
+                }
+              </div>
+            }
+          </article>
+        } @empty {
+          <div class="empty-callout"><i class="bi bi-collection"></i><strong>No Attribute sets yet</strong><span>Create a set, then add reusable Attributes to it.</span></div>
+        }
+      </div>
+    </section>
+
+    <section class="metadata-table attribute-manager attribute-library">
+      <div class="section-topline"><div><span class="panel-kicker">FIELD LIBRARY</span><h2>All Product Attributes</h2></div><span class="count-pill">{{ metadata.attributes.length }} Attributes</span></div>
+      <p class="section-help">Manage every reusable field independently. Each Attribute has its own edit action.</p>
+      <div class="attribute-library-grid">@for (item of metadata.attributes; track item.id) {<div class="library-row"><div><strong>{{ item.name }}</strong><code>{{ item.slug }} · {{ item.value_type }}</code></div><button class="icon-button" type="button" (click)="edit('attributes', item.id)" title="Edit Attribute"><i class="bi bi-pencil"></i></button></div>} @empty {<div class="empty-state">No Attributes yet.</div>}</div>
+    </section>
+  }
+</app-backoffice-page>

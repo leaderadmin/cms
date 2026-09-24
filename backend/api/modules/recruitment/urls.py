@@ -1,0 +1,4 @@
+from django.urls import path
+from .views import RecruitmentAreaDetailView, RecruitmentAreaListView, RecruitmentBusinessUnitListView, RecruitmentDepartmentDetailView, RecruitmentDepartmentListView, RecruitmentDetailView, RecruitmentListView, RecruitmentRegionDetailView, RecruitmentRegionListView
+
+urlpatterns = [path("", RecruitmentListView.as_view()), path("<int:job_id>/", RecruitmentDetailView.as_view()), path("departments/", RecruitmentDepartmentListView.as_view()), path("departments/<int:item_id>/", RecruitmentDepartmentDetailView.as_view()), path("locations/regions/", RecruitmentRegionListView.as_view()), path("locations/regions/<int:item_id>/", RecruitmentRegionDetailView.as_view()), path("locations/areas/", RecruitmentAreaListView.as_view()), path("locations/areas/<int:item_id>/", RecruitmentAreaDetailView.as_view()), path("locations/business-units/", RecruitmentBusinessUnitListView.as_view())]

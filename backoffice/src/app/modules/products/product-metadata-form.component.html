@@ -1,0 +1,18 @@
+<app-backoffice-page [eyebrow]="eyebrow" [title]="title" [description]="editId ? 'Update the details and configuration for this item.' : 'Add a reusable item to your product catalog.'" [loading]="loading" [error]="error" (retry)="goToList()">
+  <div page-actions class="page-actions"><button class="btn btn-light" type="button" (click)="goToList()"><i class="bi bi-arrow-left"></i> Back to list</button></div>
+  @if (!loading) {
+    <section class="form-panel">
+      <div class="panel-heading"><span class="panel-kicker">{{ editId ? 'EDIT RECORD' : 'NEW RECORD' }}</span><h2>{{ title }}</h2><p>Keep names and slugs consistent so this item is easy to find and reuse.</p></div>
+      <div class="form-grid">
+        <label>Name<input class="form-control" [(ngModel)]="name" placeholder="Enter a name" required></label>
+        <label>Slug<input class="form-control" [(ngModel)]="slug" placeholder="Generated from name if empty"></label>
+        @if (isGroup) { <label>Product type<select class="form-select" [(ngModel)]="productTypeId" required><option [ngValue]="null">Select a product type</option>@for (item of metadata.types; track item.id) {<option [ngValue]="item.id">{{ item.name }}</option>}</select></label> }
+        @if (isAttribute) { <label>Value type<select class="form-select" [(ngModel)]="valueType"><option value="text">Text / description</option><option value="number">Number</option><option value="boolean">Yes / No</option></select></label> }
+      </div>
+      @if (isAttributeSet) {
+        <div class="field-picker"><div class="picker-heading"><strong>Fields in this set</strong><span>{{ selectedAttributeIds.length }} selected</span></div><div class="attribute-list">@for (item of metadata.attributes; track item.id) {<label class="attribute-option"><input type="checkbox" [checked]="selectedAttributeIds.includes(item.id)" (change)="toggleAttribute(item.id)"><span><strong>{{ item.name }}</strong><small>{{ item.slug }} · {{ item.value_type }}</small></span></label>} @empty {<span class="empty-state">No Product Attributes yet.</span>}</div></div>
+      }
+      <div class="editor-actions"><button class="btn btn-primary" type="button" [disabled]="saving || !name.trim()" (click)="save()"><i class="bi bi-check-lg"></i> {{ saving ? 'Saving...' : (editId ? 'Save changes' : 'Create') }}</button></div>
+    </section>
+  }
+</app-backoffice-page>
